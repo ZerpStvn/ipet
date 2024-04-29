@@ -23,7 +23,7 @@ class _HomeUserState extends State<HomeUser> {
     preferences = await SharedPreferences.getInstance();
 
     setState(() {
-      onboardsave = preferences.getBool('onboard')!;
+      onboardsave = preferences.getBool('onboard') ?? false;
 
       debugPrint("$onboardsave");
     });
