@@ -139,7 +139,7 @@ class _MappControllerState extends State<MappController> {
           .doc(widget.documentID)
           .collection('vertirenary')
           .doc(widget.documentID)
-          .update({"lat": latitude, "long"});
+          .update({"lat": latitude, "long": longtitude});
     } catch (error) {
       debugPrint("Error - $error");
     }
