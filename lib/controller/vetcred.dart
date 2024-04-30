@@ -50,6 +50,12 @@ class _VetCredsState extends State<VetCreds> {
     specialties.dispose();
   }
 
+  Future<void> handlecredclinic() async {
+    try {
+      if (_formkey.currentState!.validate()) {}
+    } catch (error) {}
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
