@@ -1,7 +1,10 @@
 import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:ipet/controller/uploadimagefield.dart';
 import 'package:ipet/misc/formtext.dart';
 import 'package:ipet/misc/themestyle.dart';
 
@@ -15,19 +18,34 @@ class VetGovController extends StatefulWidget {
 class _VetGovControllerState extends State<VetGovController> {
   final _formkey = GlobalKey<FormState>();
   final TextEditingController tinID = TextEditingController();
-  final ImagePicker _imagePicker = ImagePicker();
+  final ImagePicker _imageDTI = ImagePicker();
+  final ImagePicker _imageBIR = ImagePicker();
 
-  XFile? xFile;
+  XFile? xfiledti;
+  XFile? xfilebir;
   bool isobscure = true;
   bool isconfirm = true;
-  Future<void> pickimage() async {
-    XFile? filepath = await _imagePicker.pickImage(source: ImageSource.gallery);
+
+  Future<void> pickimageDTI() async {
+    XFile? filepath = await _imageDTI.pickImage(source: ImageSource.gallery);
 
     setState(() {
       if (filepath != null) {
-        xFile = filepath;
+        xfiledti = filepath;
       } else {
-        xFile = null;
+        xfiledti = null;
+      }
+    });
+  }
+
+  Future<void> pickimageBIR() async {
+    XFile? filepath = await _imageBIR.pickImage(source: ImageSource.gallery);
+
+    setState(() {
+      if (filepath != null) {
+        xfilebir = filepath;
+      } else {
+        xfilebir = null;
       }
     });
   }
@@ -75,18 +93,51 @@ class _VetGovControllerState extends State<VetGovController> {
                 ),
                 Textformtype(
                     textEditingController: tinID,
-                    uppertitle: "Provide clinic TIN",
-                    fieldname: "TIN ID",
+                    uppertitle: "Provide TIN Number",
+                    fieldname: "000-000-000-00000",
                     textvalidator: "TIN 000-000-000-00000"),
                 const SizedBox(
                   height: 15,
                 ),
-                GlobalButton(callback: () {}, title: "Proceed")
+                UploadImageField(
+                  title: "Upload DTI Permit",
+                  xfiledti: xfiledti,
+                  pickimage: () {
+                    pickimageDTI();
+                  },
+                ),
+                const SizedBox(
+                  height: 15,
+                ),
+                UploadImageField(
+                  title: "Upload BIR Permit",
+                  xfiledti: xfilebir,
+                  pickimage: () {
+                    pickimageBIR();
+                  },
+                ),
+                const SizedBox(
+                  height: 15,
+                ),
+                GlobalButton(
+                    callback: () {
+                      uploadsecondcred();
+                    },
+                    title: "Proceed")
               ],
             ),
           ),
         ),
       ),
     );
+  }
+
+  Future<void> uploadsecondcred() async {
+    try {
+      if (_formkey.currentState!.validate()) {
+        Navigator.push(context,
+            MaterialPageRoute(builder: (context) => const VetGovController()));
+      }
+    } catch (error) {}
   }
 }

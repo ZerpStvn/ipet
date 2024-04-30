@@ -1,7 +1,5 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:ipet/controller/vetgov.dart';
 import 'package:ipet/misc/formtext.dart';
@@ -24,7 +22,6 @@ class _VetControllerState extends State<VetController> {
   final TextEditingController password = TextEditingController();
   final TextEditingController cpassword = TextEditingController();
   final ImagePicker _imagePicker = ImagePicker();
-
   XFile? xFile;
   bool isobscure = true;
   bool isconfirm = true;
@@ -115,7 +112,6 @@ class _VetControllerState extends State<VetController> {
             Textformtype(
                 textEditingController: nameofclinic,
                 uppertitle: "What's The Name of Your Clinic?",
-                fieldname: "Clinic mame",
                 textvalidator: "Provide clinic name"),
             const SizedBox(
               height: 15,
@@ -126,7 +122,6 @@ class _VetControllerState extends State<VetController> {
                     child: Textformtype(
                         textEditingController: ownersfirstname,
                         uppertitle: "First Name",
-                        fieldname: "First name",
                         textvalidator: "Enter first name")),
                 const SizedBox(
                   width: 5,
@@ -135,7 +130,6 @@ class _VetControllerState extends State<VetController> {
                     child: Textformtype(
                         textEditingController: ownerslastname,
                         uppertitle: "Last Name",
-                        fieldname: "Last name",
                         textvalidator: "Enter last name")),
               ],
             ),
@@ -145,7 +139,6 @@ class _VetControllerState extends State<VetController> {
             Textformtype(
                 textEditingController: phonenumber,
                 uppertitle: "Phone Number",
-                fieldname: "Phone number",
                 textvalidator: "Provide phone number"),
             const SizedBox(
               height: 15,
@@ -153,7 +146,6 @@ class _VetControllerState extends State<VetController> {
             Textformtype(
                 textEditingController: emailaddress,
                 uppertitle: "Email Address",
-                fieldname: "Email address",
                 textvalidator: "Provide valid email address"),
             const SizedBox(
               height: 15,
@@ -175,7 +167,6 @@ class _VetControllerState extends State<VetController> {
                         ),
                         textEditingController: password,
                         uppertitle: "Password",
-                        fieldname: "Password",
                         textvalidator: "Password")),
                 const SizedBox(
                   width: 5,
@@ -189,13 +180,12 @@ class _VetControllerState extends State<VetController> {
                               isconfirm = !isconfirm;
                             });
                           },
-                          child: Icon(isobscure
+                          child: Icon(isconfirm
                               ? Icons.visibility_outlined
                               : Icons.visibility_off_outlined),
                         ),
                         textEditingController: cpassword,
                         uppertitle: "Confirm Password",
-                        fieldname: "Confirm password",
                         textvalidator: "Confirm password")),
               ],
             ),
@@ -215,10 +205,11 @@ class _VetControllerState extends State<VetController> {
 
   Future<void> uploadfirstcred() async {
     try {
-      if (_formkey.currentState!.validate()) {
-        Navigator.push(context,
-            MaterialPageRoute(builder: (context) => const VetGovController()));
-      }
+      Navigator.push(context,
+          MaterialPageRoute(builder: (context) => const VetGovController()));
+      // if (_formkey.currentState!.validate()) {
+
+      // }
     } catch (error) {}
   }
 }

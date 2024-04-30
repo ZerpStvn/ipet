@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class Textformtype extends StatelessWidget {
   final TextEditingController textEditingController;
   final String uppertitle;
-  final String fieldname;
+  final String? fieldname;
   final String textvalidator;
   final Widget? icons;
   final bool? isbscure;
@@ -12,7 +12,7 @@ class Textformtype extends StatelessWidget {
       {super.key,
       required this.textEditingController,
       required this.uppertitle,
-      required this.fieldname,
+      this.fieldname,
       this.icons,
       required this.textvalidator,
       this.onchange,
