@@ -1,15 +1,13 @@
-import 'dart:io';
-
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:ipet/controller/uploadimagefield.dart';
+import 'package:ipet/controller/vetcred.dart';
 import 'package:ipet/misc/formtext.dart';
 import 'package:ipet/misc/themestyle.dart';
 
 class VetGovController extends StatefulWidget {
-  const VetGovController({super.key});
+  final String documentID;
+  const VetGovController({super.key, required this.documentID});
 
   @override
   State<VetGovController> createState() => _VetGovControllerState();
@@ -54,7 +52,12 @@ class _VetGovControllerState extends State<VetGovController> {
   void dispose() {
     super.dispose();
     tinID.dispose();
-    ;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    debugPrint("${widget.documentID}");
   }
 
   @override
@@ -135,8 +138,8 @@ class _VetGovControllerState extends State<VetGovController> {
   Future<void> uploadsecondcred() async {
     try {
       if (_formkey.currentState!.validate()) {
-        Navigator.push(context,
-            MaterialPageRoute(builder: (context) => const VetGovController()));
+        Navigator.push(
+            context, MaterialPageRoute(builder: (context) => const VetCreds()));
       }
     } catch (error) {}
   }

@@ -4,6 +4,10 @@ import 'package:image_picker/image_picker.dart';
 import 'package:ipet/controller/vetgov.dart';
 import 'package:ipet/misc/formtext.dart';
 import 'package:ipet/misc/themestyle.dart';
+import 'package:ipet/model/vetirinary.dart';
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
+import 'package:ipet/utils/characterID.dart';
+import 'package:ipet/utils/firebasehook.dart';
 
 class VetController extends StatefulWidget {
   const VetController({super.key});
@@ -22,9 +26,12 @@ class _VetControllerState extends State<VetController> {
   final TextEditingController password = TextEditingController();
   final TextEditingController cpassword = TextEditingController();
   final ImagePicker _imagePicker = ImagePicker();
+  final VeterinaryModel veterinaryModel = VeterinaryModel();
   XFile? xFile;
   bool isobscure = true;
   bool isconfirm = true;
+  bool isuploading = false;
+
   Future<void> pickimage() async {
     XFile? filepath = await _imagePicker.pickImage(source: ImageSource.gallery);
 
@@ -38,6 +45,12 @@ class _VetControllerState extends State<VetController> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    generateRandomString();
+  }
+
+  @override
   void dispose() {
     super.dispose();
     nameofclinic.dispose();
@@ -47,6 +60,61 @@ class _VetControllerState extends State<VetController> {
     emailaddress.dispose();
     password.dispose();
     cpassword.dispose();
+  }
+
+  Future<String> uploadImageToFirebase(String imagePath) async {
+    firebase_storage.Reference storageRef = firebase_storage
+        .FirebaseStorage.instance
+        .ref()
+        .child('userprofile')
+        .child(DateTime.now().millisecondsSinceEpoch.toString());
+    firebase_storage.UploadTask uploadTask =
+        storageRef.putFile(File(imagePath));
+
+    firebase_storage.TaskSnapshot taskSnapshot = await uploadTask;
+    String downloadURL = await taskSnapshot.ref.getDownloadURL();
+
+    return downloadURL;
+  }
+
+  Future<void> uploadfirstcred() async {
+    String documentID = generateRandomString();
+    try {
+      if (_formkey.currentState!.validate()) {
+        setState(() {
+          isuploading = true;
+        });
+        veterinaryModel.imageprofile = await uploadImageToFirebase(xFile!.path);
+        veterinaryModel.nameclinic = nameofclinic.text;
+        veterinaryModel.fname = ownersfirstname.text;
+        veterinaryModel.lname = ownerslastname.text;
+        veterinaryModel.pnum = phonenumber.text;
+        veterinaryModel.email = emailaddress.text;
+        veterinaryModel.pass = password.text;
+        veterinaryModel.role = 1;
+        veterinaryModel.vetid = documentID;
+        debugPrint(documentID);
+        await userAuth.signInWithEmailAndPassword(
+            email: emailaddress.text, password: password.text);
+
+        await usercred
+            .doc(documentID)
+            .set(veterinaryModel.veterinarymap())
+            .then((value) => {
+                  setState(() {
+                    isuploading = false;
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                VetGovController(documentID: documentID)));
+                    debugPrint("${documentID}");
+                  })
+                });
+      }
+    } catch (error) {
+      debugPrint("Error uploading credentials: $error");
+    }
   }
 
   @override
@@ -201,15 +269,5 @@ class _VetControllerState extends State<VetController> {
         ),
       ),
     );
-  }
-
-  Future<void> uploadfirstcred() async {
-    try {
-      Navigator.push(context,
-          MaterialPageRoute(builder: (context) => const VetGovController()));
-      // if (_formkey.currentState!.validate()) {
-
-      // }
-    } catch (error) {}
   }
 }
