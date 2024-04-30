@@ -1,9 +1,14 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:ipet/controller/uploadimagefield.dart';
 import 'package:ipet/controller/vetcred.dart';
 import 'package:ipet/misc/formtext.dart';
 import 'package:ipet/misc/themestyle.dart';
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
+import 'package:ipet/model/vetirinary.dart';
+import 'package:ipet/utils/firebasehook.dart';
 
 class VetGovController extends StatefulWidget {
   final String documentID;
@@ -18,11 +23,12 @@ class _VetGovControllerState extends State<VetGovController> {
   final TextEditingController tinID = TextEditingController();
   final ImagePicker _imageDTI = ImagePicker();
   final ImagePicker _imageBIR = ImagePicker();
-
+  final VeterinaryModel veterinaryModel = VeterinaryModel();
   XFile? xfiledti;
   XFile? xfilebir;
   bool isobscure = true;
   bool isconfirm = true;
+  bool isuploading = false;
 
   Future<void> pickimageDTI() async {
     XFile? filepath = await _imageDTI.pickImage(source: ImageSource.gallery);
@@ -57,7 +63,84 @@ class _VetGovControllerState extends State<VetGovController> {
   @override
   void initState() {
     super.initState();
-    debugPrint("${widget.documentID}");
+  }
+
+  Future<String> uploadImageToFirebaseBIR(String imagePath) async {
+    firebase_storage.Reference storageRef = firebase_storage
+        .FirebaseStorage.instance
+        .ref()
+        .child('govid')
+        .child(DateTime.now().millisecondsSinceEpoch.toString());
+    firebase_storage.UploadTask uploadTask =
+        storageRef.putFile(File(imagePath));
+
+    firebase_storage.TaskSnapshot taskSnapshot = await uploadTask;
+    String downloadURL = await taskSnapshot.ref.getDownloadURL();
+
+    return downloadURL;
+  }
+
+  Future<String> uploadImageToFirebaseDTI(String imagePath) async {
+    firebase_storage.Reference storageRef = firebase_storage
+        .FirebaseStorage.instance
+        .ref()
+        .child('govid')
+        .child(DateTime.now().millisecondsSinceEpoch.toString());
+    firebase_storage.UploadTask uploadTask =
+        storageRef.putFile(File(imagePath));
+
+    firebase_storage.TaskSnapshot taskSnapshot = await uploadTask;
+    String downloadURL = await taskSnapshot.ref.getDownloadURL();
+
+    return downloadURL;
+  }
+
+  Future<void> handlegovid() async {
+    setState(() {
+      isuploading = true;
+    });
+    try {
+      if (xfiledti == null) {
+        const SnackBar(
+          content: Text("Please upload DTI permit"),
+        );
+        setState(() {
+          isuploading = false;
+        });
+      } else if (xfilebir == null) {
+        const SnackBar(
+          content: Text("Please upload DTI permit"),
+        );
+        setState(() {
+          isuploading = false;
+        });
+      } else {
+        if (_formkey.currentState!.validate()) {
+          String birpermit = await uploadImageToFirebaseBIR(xfilebir!.path);
+          String dtipermit = await uploadImageToFirebaseDTI(xfiledti!.path);
+
+          await usercred.doc(widget.documentID).update({
+            "bir": birpermit,
+            "dti": dtipermit,
+            "tin": tinID.text
+          }).then((value) {
+            setState(() {
+              isuploading = false;
+            });
+            debugPrint(widget.documentID);
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) =>
+                        VetCreds(documentID: widget.documentID)));
+          });
+        }
+      }
+    } catch (error) {
+      const SnackBar(
+        content: Text("Error uploading credentials"),
+      );
+    }
   }
 
   @override
@@ -122,25 +205,22 @@ class _VetGovControllerState extends State<VetGovController> {
                 const SizedBox(
                   height: 15,
                 ),
-                GlobalButton(
-                    callback: () {
-                      uploadsecondcred();
-                    },
-                    title: "Proceed")
+                isuploading == false
+                    ? GlobalButton(
+                        callback: () {
+                          isuploading == false ? handlegovid() : null;
+                        },
+                        title: "Proceed")
+                    : Center(
+                        child: CircularProgressIndicator(
+                          color: maincolor,
+                        ),
+                      )
               ],
             ),
           ),
         ),
       ),
     );
-  }
-
-  Future<void> uploadsecondcred() async {
-    try {
-      if (_formkey.currentState!.validate()) {
-        Navigator.push(
-            context, MaterialPageRoute(builder: (context) => const VetCreds()));
-      }
-    } catch (error) {}
   }
 }

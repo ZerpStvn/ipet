@@ -6,7 +6,8 @@ import 'package:ipet/misc/themestyle.dart';
 import 'package:textfield_tags/textfield_tags.dart';
 
 class VetCreds extends StatefulWidget {
-  const VetCreds({super.key});
+  final String documentID;
+  const VetCreds({super.key, required this.documentID});
 
   @override
   State<VetCreds> createState() => _VetCredsState();
@@ -22,6 +23,7 @@ class _VetCredsState extends State<VetCreds> {
   late StringTagController specialties;
   late double _distanceSpecialties;
   late double _distanceToField;
+  bool isupload = false;
 
   List<String> servicetags = [];
   List<String> specialtiesList = [];

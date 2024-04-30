@@ -77,43 +77,48 @@ class _VetControllerState extends State<VetController> {
     return downloadURL;
   }
 
+  Future<void> handlecreateuser() async {
+    veterinaryModel.imageprofile = await uploadImageToFirebase(xFile!.path);
+    veterinaryModel.nameclinic = nameofclinic.text;
+    veterinaryModel.fname = ownersfirstname.text;
+    veterinaryModel.lname = ownerslastname.text;
+    veterinaryModel.pnum = phonenumber.text;
+    veterinaryModel.email = emailaddress.text;
+    veterinaryModel.pass = password.text;
+    veterinaryModel.role = 1;
+    veterinaryModel.vetid = userAuth.currentUser!.uid;
+    await usercred
+        .doc(userAuth.currentUser!.uid)
+        .set(veterinaryModel.veterinarymap())
+        .then((value) => {
+              setState(() {
+                isuploading = false;
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => VetGovController(
+                            documentID: userAuth.currentUser!.uid)));
+              })
+            });
+  }
+
   Future<void> uploadfirstcred() async {
-    String documentID = generateRandomString();
     try {
       if (_formkey.currentState!.validate()) {
         setState(() {
           isuploading = true;
         });
-        veterinaryModel.imageprofile = await uploadImageToFirebase(xFile!.path);
-        veterinaryModel.nameclinic = nameofclinic.text;
-        veterinaryModel.fname = ownersfirstname.text;
-        veterinaryModel.lname = ownerslastname.text;
-        veterinaryModel.pnum = phonenumber.text;
-        veterinaryModel.email = emailaddress.text;
-        veterinaryModel.pass = password.text;
-        veterinaryModel.role = 1;
-        veterinaryModel.vetid = documentID;
-        debugPrint(documentID);
-        await userAuth.signInWithEmailAndPassword(
-            email: emailaddress.text, password: password.text);
 
-        await usercred
-            .doc(documentID)
-            .set(veterinaryModel.veterinarymap())
-            .then((value) => {
-                  setState(() {
-                    isuploading = false;
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) =>
-                                VetGovController(documentID: documentID)));
-                    debugPrint("${documentID}");
-                  })
-                });
+        await userAuth
+            .createUserWithEmailAndPassword(
+                email: emailaddress.text, password: password.text)
+            .then((value) => handlecreateuser());
       }
     } catch (error) {
       debugPrint("Error uploading credentials: $error");
+      const SnackBar(
+        content: Text("Error uploading credentials"),
+      );
     }
   }
 
@@ -260,11 +265,17 @@ class _VetControllerState extends State<VetController> {
             const SizedBox(
               height: 15,
             ),
-            GlobalButton(
-                callback: () {
-                  uploadfirstcred();
-                },
-                title: "Proceed")
+            isuploading == false
+                ? GlobalButton(
+                    callback: () {
+                      isuploading == false ? uploadfirstcred() : null;
+                    },
+                    title: "Proceed")
+                : Center(
+                    child: CircularProgressIndicator(
+                      color: maincolor,
+                    ),
+                  )
           ],
         ),
       ),

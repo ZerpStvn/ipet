@@ -17,9 +17,11 @@ class VeterinaryModel {
   String? description;
   String? lat;
   String? long;
+  int? valid;
 
   VeterinaryModel(
       {this.vetid,
+      this.valid,
       this.imageprofile,
       this.role,
       this.nameclinic,
@@ -41,6 +43,7 @@ class VeterinaryModel {
   factory VeterinaryModel.getdocument(map) {
     return VeterinaryModel(
       vetid: map['vetid'],
+      valid: map['valid'],
       imageprofile: map['imageprofile'],
       role: map['role'],
       nameclinic: map['nameclinic'],
@@ -63,7 +66,8 @@ class VeterinaryModel {
 
   Map<String, dynamic> veterinarymap() {
     return {
-      'vetid': 'vetid',
+      'vetid': vetid,
+      'valid': 0,
       "imageprofile": imageprofile,
       "role": role,
       "nameclinic": nameclinic,
