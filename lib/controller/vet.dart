@@ -1,10 +1,13 @@
 import 'dart:io';
+import 'dart:math';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:ipet/controller/vetgov.dart';
 import 'package:ipet/misc/formtext.dart';
+import 'package:ipet/misc/snackbar.dart';
 import 'package:ipet/misc/themestyle.dart';
-import 'package:ipet/model/vetirinary.dart';
+import 'package:ipet/model/users.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:ipet/utils/characterID.dart';
 import 'package:ipet/utils/firebasehook.dart';
@@ -26,11 +29,12 @@ class _VetControllerState extends State<VetController> {
   final TextEditingController password = TextEditingController();
   final TextEditingController cpassword = TextEditingController();
   final ImagePicker _imagePicker = ImagePicker();
-  final VeterinaryModel veterinaryModel = VeterinaryModel();
+  final UsersModel usersModel = UsersModel();
   XFile? xFile;
   bool isobscure = true;
   bool isconfirm = true;
   bool isuploading = false;
+  String? imageprofile;
 
   Future<void> pickimage() async {
     XFile? filepath = await _imagePicker.pickImage(source: ImageSource.gallery);
@@ -78,18 +82,18 @@ class _VetControllerState extends State<VetController> {
   }
 
   Future<void> handlecreateuser() async {
-    veterinaryModel.imageprofile = await uploadImageToFirebase(xFile!.path);
-    veterinaryModel.nameclinic = nameofclinic.text;
-    veterinaryModel.fname = ownersfirstname.text;
-    veterinaryModel.lname = ownerslastname.text;
-    veterinaryModel.pnum = phonenumber.text;
-    veterinaryModel.email = emailaddress.text;
-    veterinaryModel.pass = password.text;
-    veterinaryModel.role = 1;
-    veterinaryModel.vetid = userAuth.currentUser!.uid;
+    usersModel.imageprofile = await uploadImageToFirebase(xFile!.path);
+    usersModel.nameclinic = nameofclinic.text;
+    usersModel.fname = ownersfirstname.text;
+    usersModel.lname = ownerslastname.text;
+    usersModel.pnum = phonenumber.text;
+    usersModel.email = emailaddress.text;
+    usersModel.pass = password.text;
+    usersModel.role = 1;
+    usersModel.vetid = userAuth.currentUser!.uid;
     await usercred
         .doc(userAuth.currentUser!.uid)
-        .set(veterinaryModel.veterinarymap())
+        .set(usersModel.usersModelmap())
         .then((value) => {
               setState(() {
                 isuploading = false;
@@ -103,22 +107,34 @@ class _VetControllerState extends State<VetController> {
   }
 
   Future<void> uploadfirstcred() async {
+    setState(() {
+      isuploading = true;
+    });
     try {
       if (_formkey.currentState!.validate()) {
+        if (xFile != null) {
+          await userAuth
+              .createUserWithEmailAndPassword(
+                  email: emailaddress.text, password: password.text)
+              .then((value) => handlecreateuser());
+        } else {
+          setState(() {
+            imageprofile = "Add your profile picture";
+            isuploading = false;
+          });
+        }
+      } else {
         setState(() {
-          isuploading = true;
+          isuploading = false;
         });
-
-        await userAuth
-            .createUserWithEmailAndPassword(
-                email: emailaddress.text, password: password.text)
-            .then((value) => handlecreateuser());
       }
-    } catch (error) {
-      debugPrint("Error uploading credentials: $error");
-      const SnackBar(
-        content: Text("Error uploading credentials"),
+    } on FirebaseException catch (e) {
+      SnackbarMessage(
+        message: "$e",
       );
+      setState(() {
+        isuploading = false;
+      });
     }
   }
 
@@ -178,6 +194,10 @@ class _VetControllerState extends State<VetController> {
                             image: AssetImage("assets/placeholder.png")),
                       ),
               ),
+            ),
+            MainFont(
+              title: imageprofile ?? "",
+              color: Colors.red,
             ),
             const SizedBox(
               height: 15,

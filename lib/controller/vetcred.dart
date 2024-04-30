@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:ipet/controller/fieldTags.dart';
+import 'package:ipet/controller/vetmap.dart';
 import 'package:ipet/misc/formtext.dart';
 import 'package:ipet/misc/themestyle.dart';
+import 'package:ipet/utils/firebasehook.dart';
 import 'package:textfield_tags/textfield_tags.dart';
 
 class VetCreds extends StatefulWidget {
@@ -51,9 +53,38 @@ class _VetCredsState extends State<VetCreds> {
   }
 
   Future<void> handlecredclinic() async {
+    setState(() {
+      isupload = true;
+    });
     try {
-      if (_formkey.currentState!.validate()) {}
-    } catch (error) {}
+      if (_formkey.currentState!.validate()) {
+        await usercred
+            .doc(widget.documentID)
+            .collection('vertirenary')
+            .doc(widget.documentID)
+            .update({
+          "operation": clinicSchedule,
+          "services": servicetags,
+          "specialties": specialtiesList,
+          "description": description.text,
+          "dateestablished": dateEstablished.text,
+        }).then((value) {
+          setState(() {
+            isupload = false;
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) =>
+                        VetMapping(documentID: widget.documentID)));
+          });
+        });
+      }
+    } catch (error) {
+      debugPrint("error - $error");
+      setState(() {
+        isupload = false;
+      });
+    }
   }
 
   @override
@@ -180,8 +211,19 @@ class _VetCredsState extends State<VetCreds> {
                     servicetags: specialtiesList),
                 const Text("E.g: orthopedic, dermatology, exotic-pets, etc."),
                 const SizedBox(
-                  height: 5,
+                  height: 25,
                 ),
+                isupload == false
+                    ? GlobalButton(
+                        callback: () {
+                          handlecredclinic();
+                        },
+                        title: "Continue")
+                    : Center(
+                        child: CircularProgressIndicator(
+                          color: maincolor,
+                        ),
+                      )
               ],
             ),
           ),

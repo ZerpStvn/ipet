@@ -1,13 +1,4 @@
 class VeterinaryModel {
-  String? vetid;
-  String? imageprofile;
-  int? role;
-  String? nameclinic;
-  String? fname;
-  String? lname;
-  String? pnum;
-  String? email;
-  String? pass;
   String? tin;
   String? dti;
   String? bir;
@@ -18,18 +9,10 @@ class VeterinaryModel {
   String? lat;
   String? long;
   int? valid;
+  String? dateestablished;
 
   VeterinaryModel(
-      {this.vetid,
-      this.valid,
-      this.imageprofile,
-      this.role,
-      this.nameclinic,
-      this.fname,
-      this.lname,
-      this.pnum,
-      this.email,
-      this.pass,
+      {this.valid,
       this.tin,
       this.dti,
       this.bir,
@@ -38,20 +21,12 @@ class VeterinaryModel {
       this.specialties,
       this.description,
       this.lat,
-      this.long});
+      this.long,
+      this.dateestablished});
 
   factory VeterinaryModel.getdocument(map) {
     return VeterinaryModel(
-      vetid: map['vetid'],
       valid: map['valid'],
-      imageprofile: map['imageprofile'],
-      role: map['role'],
-      nameclinic: map['nameclinic'],
-      fname: map['fname'],
-      lname: map['lname'],
-      pnum: map['pnum'],
-      email: map['email'],
-      pass: map['pass'],
       tin: map['tin'],
       dti: map['dti'],
       bir: map['bir'],
@@ -61,21 +36,13 @@ class VeterinaryModel {
       description: map['description'],
       lat: map['lat'],
       long: map['long'],
+      dateestablished: map['dateestablished'],
     );
   }
 
   Map<String, dynamic> veterinarymap() {
     return {
-      'vetid': vetid,
       'valid': 0,
-      "imageprofile": imageprofile,
-      "role": role,
-      "nameclinic": nameclinic,
-      "fname": fname,
-      "lname": lname,
-      "pnum": pnum,
-      "email": email,
-      "pass": pass,
       "tin": tin,
       "dti": dti,
       "bir": bir,
@@ -85,6 +52,7 @@ class VeterinaryModel {
       "description": description,
       "lat": lat,
       "long": long,
+      "dateestablished": dateestablished,
     };
   }
 }

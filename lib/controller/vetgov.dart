@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:ipet/controller/uploadimagefield.dart';
 import 'package:ipet/controller/vetcred.dart';
 import 'package:ipet/misc/formtext.dart';
+import 'package:ipet/misc/snackbar.dart';
 import 'package:ipet/misc/themestyle.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:ipet/model/vetirinary.dart';
@@ -116,14 +117,15 @@ class _VetGovControllerState extends State<VetGovController> {
         });
       } else {
         if (_formkey.currentState!.validate()) {
-          String birpermit = await uploadImageToFirebaseBIR(xfilebir!.path);
-          String dtipermit = await uploadImageToFirebaseDTI(xfiledti!.path);
-
-          await usercred.doc(widget.documentID).update({
-            "bir": birpermit,
-            "dti": dtipermit,
-            "tin": tinID.text
-          }).then((value) {
+          veterinaryModel.bir = await uploadImageToFirebaseBIR(xfilebir!.path);
+          veterinaryModel.dti = await uploadImageToFirebaseDTI(xfiledti!.path);
+          veterinaryModel.tin = tinID.text;
+          await usercred
+              .doc(widget.documentID)
+              .collection('vertirenary')
+              .doc(widget.documentID)
+              .set(veterinaryModel.veterinarymap())
+              .then((value) {
             setState(() {
               isuploading = false;
             });
@@ -137,9 +139,10 @@ class _VetGovControllerState extends State<VetGovController> {
         }
       }
     } catch (error) {
-      const SnackBar(
-        content: Text("Error uploading credentials"),
-      );
+      const SnackbarMessage(message: "Error Uploading Documents");
+      setState(() {
+        isuploading = false;
+      });
     }
   }
 

@@ -4,21 +4,15 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class WebMapController extends StatefulWidget {
-  final String latitude;
-  final String longtitude;
-
-  const WebMapController(
-      {super.key, required this.latitude, required this.longtitude});
+  const WebMapController({super.key});
 
   @override
-  State<WebMapController> createState() =>
-      // ignore: no_logic_in_create_state
-      _WebMapControllerState(latitude, longtitude);
+  State<WebMapController> createState() => _WebMapControllerState();
 }
 
 class _WebMapControllerState extends State<WebMapController> {
-  String latitude;
-  String longtitude;
+  String? latitude;
+  String? longtitude;
   final Completer<GoogleMapController> _controller =
       Completer<GoogleMapController>();
 
@@ -29,8 +23,6 @@ class _WebMapControllerState extends State<WebMapController> {
 
   final BitmapDescriptor customMarkerIcon =
       BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure);
-
-  _WebMapControllerState(this.latitude, this.longtitude);
 
   @override
   void dispose() {
