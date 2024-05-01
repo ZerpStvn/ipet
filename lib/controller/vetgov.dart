@@ -13,7 +13,9 @@ import 'package:ipet/utils/firebasehook.dart';
 
 class VetGovController extends StatefulWidget {
   final String documentID;
-  const VetGovController({super.key, required this.documentID});
+  final bool ishome;
+  const VetGovController(
+      {super.key, required this.documentID, required this.ishome});
 
   @override
   State<VetGovController> createState() => _VetGovControllerState();
@@ -102,16 +104,12 @@ class _VetGovControllerState extends State<VetGovController> {
     });
     try {
       if (xfiledti == null) {
-        const SnackBar(
-          content: Text("Please upload DTI permit"),
-        );
+        snackbar(context, "Please upload DTI permit");
         setState(() {
           isuploading = false;
         });
       } else if (xfilebir == null) {
-        const SnackBar(
-          content: Text("Please upload DTI permit"),
-        );
+        snackbar(context, "Please upload BIR permit");
         setState(() {
           isuploading = false;
         });
@@ -126,23 +124,32 @@ class _VetGovControllerState extends State<VetGovController> {
               .doc(widget.documentID)
               .set(veterinaryModel.veterinarymap())
               .then((value) {
+            ishome();
             setState(() {
               isuploading = false;
             });
             debugPrint(widget.documentID);
-            Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) =>
-                        VetCreds(documentID: widget.documentID)));
           });
         }
       }
     } catch (error) {
-      const SnackbarMessage(message: "Error Uploading Documents");
+      if (mounted) {
+        snackbar(context, "$error");
+      }
       setState(() {
         isuploading = false;
       });
+    }
+  }
+
+  void ishome() {
+    if (widget.ishome) {
+      Navigator.pushNamedAndRemoveUntil(context, '/vetuser', (route) => false);
+    } else {
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => VetCreds(documentID: widget.documentID)));
     }
   }
 
@@ -211,7 +218,8 @@ class _VetGovControllerState extends State<VetGovController> {
                 isuploading == false
                     ? GlobalButton(
                         callback: () {
-                          isuploading == false ? handlegovid() : null;
+                          handlegovid();
+                          debugPrint("${widget.ishome}");
                         },
                         title: "Proceed")
                     : Center(

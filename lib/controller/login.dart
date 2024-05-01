@@ -1,6 +1,13 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:ipet/controller/selecttype.dart';
+import 'package:ipet/misc/snackbar.dart';
 import 'package:ipet/misc/themestyle.dart';
+import 'package:ipet/model/Authprovider.dart';
+import 'package:ipet/model/vetirinary.dart';
+import 'package:ipet/utils/firebasehook.dart';
+import 'package:provider/provider.dart';
 
 class GloballoginController extends StatefulWidget {
   const GloballoginController({super.key});
@@ -13,13 +20,29 @@ class _GloballoginControllerState extends State<GloballoginController> {
   final _formkey = GlobalKey<FormState>();
   final TextEditingController email = TextEditingController();
   final TextEditingController password = TextEditingController();
+  final VeterinaryModel veterinaryModel = VeterinaryModel();
   bool isobscure = true;
+  String error = "";
+  bool isloggingin = false;
 
   @override
   void dispose() {
     super.dispose();
     email.dispose();
     password.dispose();
+  }
+
+  void getuserdata(role) {
+    if (role == 1) {
+      Navigator.pushNamedAndRemoveUntil(context, '/vetuser', (route) => false);
+    }
+  }
+
+  Future<void> getveterinary(uid) async {
+    DocumentSnapshot datafetch =
+        await usercred.doc(uid).collection('collectionPath').doc(uid).get();
+
+    if (datafetch.exists) {}
   }
 
   @override
@@ -136,7 +159,17 @@ class _GloballoginControllerState extends State<GloballoginController> {
                     const SizedBox(
                       height: 5,
                     ),
-                    GlobalButton(callback: () {}, title: "Login"),
+                    isloggingin == false
+                        ? GlobalButton(
+                            callback: () {
+                              loginuser(context, email.text, password.text);
+                            },
+                            title: "Login")
+                        : Center(
+                            child: CircularProgressIndicator(
+                              color: maincolor,
+                            ),
+                          ),
                     Center(
                       child: TextButton(
                           onPressed: () => Navigator.push(
@@ -155,5 +188,50 @@ class _GloballoginControllerState extends State<GloballoginController> {
         ),
       ),
     );
+  }
+
+  Future<void> loginuser(BuildContext context, String email, password) async {
+    final authProvider = Provider.of<AuthProviderClass>(context, listen: false);
+
+    setState(() {
+      isloggingin = true;
+    });
+    try {
+      await authProvider
+          .loginWithEmailAndPassword(email, password)
+          .then((value) {
+        getuserdata(authProvider.userModel!.role);
+        setState(() {
+          isloggingin = false;
+        });
+      });
+    } on FirebaseAuthException catch (error) {
+      setState(() {
+        switch (error.code) {
+          case "invalid-email":
+            debugPrint("Your email address is invalid.");
+            break;
+          case "wrong-password":
+            debugPrint("Your password is wrong.");
+            break;
+          case "user-not-found":
+            debugPrint("User with this email doesn't exist.");
+            break;
+          case "user-disabled":
+            debugPrint("User with this email has been disabled.");
+            break;
+          case "too-many-requests":
+            debugPrint("Too many requests");
+            break;
+          case "operation-not-allowed":
+            debugPrint("Signing in with Email and Password is not enabled.");
+            break;
+          default:
+            snackbar(context, "Check your email, password and try again");
+        }
+
+        isloggingin = false;
+      });
+    }
   }
 }

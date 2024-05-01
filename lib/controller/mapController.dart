@@ -1,13 +1,21 @@
+// ignore_for_file: file_names
+
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:ipet/controller/login.dart';
+import 'package:ipet/misc/snackbar.dart';
 import 'package:ipet/misc/themestyle.dart';
 import 'package:ipet/utils/firebasehook.dart';
-import 'package:location/location.dart';
+import 'package:ipet/veterinary/home.vet.dart';
+import 'package:ipet/veterinary/pages/main.home.dart';
+// import 'package:location/location.dart';
 
 class MappController extends StatefulWidget {
   final String documentID;
-  const MappController({super.key, required this.documentID});
+  final bool ishome;
+  const MappController(
+      {super.key, required this.documentID, required this.ishome});
 
   @override
   State<MappController> createState() => _MappControllerState();
@@ -16,10 +24,12 @@ class MappController extends StatefulWidget {
 class _MappControllerState extends State<MappController> {
   String? latitude;
   String? longtitude;
-  Location location = Location();
-  bool _serviceEnabled = false;
+  // Location location = Location();
+  // bool _serviceEnabled = false;
   final Completer<GoogleMapController> _controller =
       Completer<GoogleMapController>();
+
+  bool isupload = false;
 
   static const CameraPosition _kGooglePlex = CameraPosition(
     target: LatLng(10.720641, 122.553519),
@@ -47,21 +57,21 @@ class _MappControllerState extends State<MappController> {
             _controller.complete(controller);
           },
         ),
-        Positioned(
-            top: 20,
-            left: 18,
-            child: FloatingActionButton(
-              backgroundColor: maincolor,
-              onPressed: () {
-                // getCurrentLocation();
+        // Positioned(
+        //     top: 20,
+        //     left: 18,
+        //     child: FloatingActionButton(
+        //       backgroundColor: maincolor,
+        //       onPressed: () {
+        //         // getCurrentLocation();
 
-                debugPrint("lat = $latitude \n long = $longtitude");
-              },
-              child: const Icon(
-                Icons.my_location_outlined,
-                color: Colors.white,
-              ),
-            )),
+        //         debugPrint("lat = $latitude \n long = $longtitude");
+        //       },
+        //       child: const Icon(
+        //         Icons.my_location_outlined,
+        //         color: Colors.white,
+        //       ),
+        //     )),
         if (latitude != null &&
             longtitude != null &&
             latitude!.isNotEmpty &&
@@ -74,11 +84,19 @@ class _MappControllerState extends State<MappController> {
               height: 50,
               child: FloatingActionButton(
                 backgroundColor: maincolor,
-                onPressed: () {},
-                child: const MainFont(
-                  title: "Continue",
-                  color: Colors.white,
-                ),
+                onPressed: () {
+                  isupload == false ? updatelatlong() : null;
+                },
+                child: isupload == false
+                    ? const MainFont(
+                        title: "Continue",
+                        color: Colors.white,
+                      )
+                    : const Center(
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                        ),
+                      ),
               ),
             ),
           )
@@ -114,34 +132,62 @@ class _MappControllerState extends State<MappController> {
     controller.animateCamera(CameraUpdate.newLatLng(latLng));
   }
 
-  Future<void> getCurrentLocation() async {
-    try {
-      _serviceEnabled = await location.serviceEnabled();
-      if (!_serviceEnabled) {
-        _serviceEnabled = await location.requestService();
-        if (!_serviceEnabled) {
-          return;
-        }
-      } else {
-        LocationData currentLocation = await location.getLocation();
-        final LatLng currentLatLng =
-            LatLng(currentLocation.latitude!, currentLocation.longitude!);
-        _onMapTapped(currentLatLng);
-      }
-    } catch (error) {
-      debugPrint("Error getting current location: $error");
-    }
-  }
+  // Future<void> getCurrentLocation() async {
+  //   try {
+  //     _serviceEnabled = await location.serviceEnabled();
+  //     if (!_serviceEnabled) {
+  //       _serviceEnabled = await location.requestService();
+  //       if (!_serviceEnabled) {
+  //         return;
+  //       }
+  //     } else {
+  //       LocationData currentLocation = await location.getLocation();
+  //       final LatLng currentLatLng =
+  //           LatLng(currentLocation.latitude!, currentLocation.longitude!);
+  //       _onMapTapped(currentLatLng);
+  //     }
+  //   } catch (error) {
+  //     debugPrint("Error getting current location: $error");
+  //   }
+  // }
 
   Future<void> updatelatlong() async {
+    setState(() {
+      isupload = true;
+    });
     try {
       await usercred
           .doc(widget.documentID)
           .collection('vertirenary')
           .doc(widget.documentID)
-          .update({"lat": latitude, "long": longtitude});
+          .update({"lat": latitude, "long": longtitude}).then((value) => {
+                checknavigate(),
+                setState(() {
+                  isupload = false;
+                }),
+              });
     } catch (error) {
-      debugPrint("Error - $error");
+      if (mounted) {
+        snackbar(context, "$error");
+      }
+      setState(() {
+        isupload = false;
+      });
+    }
+  }
+
+  void checknavigate() {
+    if (widget.ishome) {
+      Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const HomeScreenVeterinary()),
+          (route) => false);
+    } else {
+      Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(
+              builder: (context) => const GloballoginController()),
+          (route) => false);
     }
   }
 }

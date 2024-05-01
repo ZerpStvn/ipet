@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:math';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -101,7 +100,9 @@ class _VetControllerState extends State<VetController> {
                     context,
                     MaterialPageRoute(
                         builder: (context) => VetGovController(
-                            documentID: userAuth.currentUser!.uid)));
+                              documentID: userAuth.currentUser!.uid,
+                              ishome: false,
+                            )));
               })
             });
   }
@@ -129,9 +130,9 @@ class _VetControllerState extends State<VetController> {
         });
       }
     } on FirebaseException catch (e) {
-      SnackbarMessage(
-        message: "$e",
-      );
+      if (mounted) {
+        snackbar(context, "$e");
+      }
       setState(() {
         isuploading = false;
       });
