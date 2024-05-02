@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:ipet/client/pages/home.client.dart';
 import 'package:ipet/controller/selecttype.dart';
 import 'package:ipet/misc/snackbar.dart';
 import 'package:ipet/misc/themestyle.dart';
@@ -35,6 +36,11 @@ class _GloballoginControllerState extends State<GloballoginController> {
   void getuserdata(role) {
     if (role == 1) {
       Navigator.pushNamedAndRemoveUntil(context, '/vetuser', (route) => false);
+    } else if (role == 2) {
+      Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const HomeClientMain()),
+          (route) => false);
     }
   }
 
@@ -177,8 +183,7 @@ class _GloballoginControllerState extends State<GloballoginController> {
                               MaterialPageRoute(
                                   builder: (context) =>
                                       const SelectTypeUser())),
-                          child:
-                              const Text("Don't have and account ? Sign up")),
+                          child: const Text("Don't have an account ? Sign up")),
                     ),
                   ],
                 )
@@ -197,14 +202,20 @@ class _GloballoginControllerState extends State<GloballoginController> {
       isloggingin = true;
     });
     try {
-      await authProvider
-          .loginWithEmailAndPassword(email, password)
-          .then((value) {
-        getuserdata(authProvider.userModel!.role);
+      if (_formkey.currentState!.validate()) {
+        await authProvider
+            .loginWithEmailAndPassword(email, password)
+            .then((value) {
+          getuserdata(authProvider.userModel!.role);
+          setState(() {
+            isloggingin = false;
+          });
+        });
+      } else {
         setState(() {
           isloggingin = false;
         });
-      });
+      }
     } on FirebaseAuthException catch (error) {
       setState(() {
         switch (error.code) {

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:ipet/model/Authprovider.dart';
 import 'package:ipet/veterinary/widgets/cardlist.dart';
 import 'package:ipet/veterinary/widgets/headline.dart';
+import 'package:ipet/veterinary/widgets/rheadline.dart';
 import 'package:ipet/veterinary/widgets/sheadline.dart';
 import 'package:ipet/veterinary/widgets/topbar.dart';
 import 'package:provider/provider.dart';
@@ -15,9 +16,7 @@ class MainHomeVet extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        TopBar(
-          clinicname: '${authprovider.userModel!.nameclinic}',
-        ),
+        const TopBar(),
         PromoCard(
           tin: "${authprovider.veterinarymovel!.tin}",
           dti: "${authprovider.veterinarymovel!.dti}",
@@ -32,7 +31,7 @@ class MainHomeVet extends StatelessWidget {
         ),
         const Headline(),
         const CardListView(),
-        // const SHeadline(),
+        const SHeadline(),
       ],
     );
   }

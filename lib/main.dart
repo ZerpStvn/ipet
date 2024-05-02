@@ -3,7 +3,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:ipet/admin/pages/home.admin.dart';
+import 'package:ipet/client/controller/signup.dart';
 import 'package:ipet/client/pages/home.user.dart';
+import 'package:ipet/controller/signup.dart';
 import 'package:ipet/firebase_options.dart';
 import 'package:ipet/model/Authprovider.dart';
 import 'package:ipet/veterinary/home.vet.dart';
@@ -30,11 +32,17 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         title: 'ipet',
         theme: ThemeData(
-          fontFamily: GoogleFonts.roboto().fontFamily,
-          colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xffbacd92)),
+          appBarTheme: const AppBarTheme(
+              backgroundColor: Colors.white, surfaceTintColor: Colors.white),
+          fontFamily: GoogleFonts.poppins().fontFamily,
+          colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xff78AEA8)),
           useMaterial3: true,
         ),
-        routes: {'/vetuser': (context) => const HomeScreenVeterinary()},
+        routes: {
+          '/pet': (context) => const ClientRegister(),
+          '/vet': (context) => const SignupController(isvet: true),
+          '/vetuser': (context) => const HomeScreenVeterinary()
+        },
         initialRoute: '/',
         home: kIsWeb ? const HomeAdmin() : const HomeUser(),
       ),

@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:ipet/misc/themestyle.dart';
 
 class Headline extends StatelessWidget {
   const Headline({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const Padding(
+    return Padding(
       padding: EdgeInsets.only(left: 25.0, right: 25.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Column(
+          const Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
@@ -31,8 +32,7 @@ class Headline extends StatelessWidget {
           ),
           Text(
             "View More",
-            style: TextStyle(
-                color: Color(0xff15BE77), fontWeight: FontWeight.normal),
+            style: TextStyle(color: maincolor, fontWeight: FontWeight.normal),
           ),
         ],
       ),

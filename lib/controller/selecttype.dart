@@ -31,6 +31,7 @@ class _SelectTypeUserState extends State<SelectTypeUser> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
         surfaceTintColor: Colors.white,
       ),
       body: Column(
@@ -78,11 +79,12 @@ class _SelectTypeUserState extends State<SelectTypeUser> {
                 padding: const EdgeInsets.all(8.0),
                 child: GestureDetector(
                   onTap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) =>
-                                SignupController(isvet: items['isvet'])));
+                    Navigator.pushNamed(context, items['route']);
+                    // Navigator.push(
+                    //     context,
+                    //     MaterialPageRoute(
+                    //         builder: (context) =>
+                    //             SignupController(isvet: items['isvet'])));
                   },
                   child: Column(
                     children: [

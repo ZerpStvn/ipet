@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:ipet/controller/login.dart';
 import 'package:ipet/misc/themestyle.dart';
+import 'package:ipet/model/Authprovider.dart';
+import 'package:provider/provider.dart';
 
 class TopBar extends StatelessWidget {
-  final String clinicname;
-  const TopBar({super.key, required this.clinicname});
+  const TopBar({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final provider = Provider.of<AuthProviderClass>(context);
     return Padding(
       padding: const EdgeInsets.all(25.0),
       child: Row(
@@ -26,13 +29,18 @@ class TopBar extends StatelessWidget {
                   spreadRadius: 0,
                   color: Colors.grey.withOpacity(.25)),
             ]),
-            child: CircleAvatar(
-              radius: 25,
-              backgroundColor: Colors.white,
-              child: Icon(
-                Icons.location_on,
-                size: 25,
-                color: maincolor,
+            child: GestureDetector(
+              onTap: () async {
+                await provider.logout(context);
+              },
+              child: CircleAvatar(
+                radius: 25,
+                backgroundColor: Colors.white,
+                child: Icon(
+                  Icons.logout_outlined,
+                  size: 25,
+                  color: maincolor,
+                ),
               ),
             ),
           )

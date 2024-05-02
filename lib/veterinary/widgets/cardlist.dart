@@ -13,15 +13,15 @@ class CardListView extends StatelessWidget {
         child: ListView(
           scrollDirection: Axis.horizontal,
           children: const [
-            Card(
+            CardView(
                 "John",
                 "https://images.unsplash.com/photo-1689972205070-fa0ef37b338e?q=80&w=2129&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
                 "April 8, 204 8:00 AM"),
-            Card(
+            CardView(
                 "Natalie ",
                 "https://images.unsplash.com/photo-1673422862662-6e6fb19d3f6c?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
                 "April 9, 204 8:00 AM"),
-            Card(
+            CardView(
                 "Mark",
                 "https://images.unsplash.com/photo-1689969936220-096f886bd0e3?q=80&w=2071&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
                 "April 10, 204 8:00 AM"),
@@ -32,12 +32,12 @@ class CardListView extends StatelessWidget {
   }
 }
 
-class Card extends StatelessWidget {
+class CardView extends StatelessWidget {
   final String text;
   final String imageUrl;
   final String subtitle;
 
-  const Card(this.text, this.imageUrl, this.subtitle, {super.key});
+  const CardView(this.text, this.imageUrl, this.subtitle, {super.key});
 
   @override
   Widget build(BuildContext context) {

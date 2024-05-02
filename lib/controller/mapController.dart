@@ -3,19 +3,23 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:ipet/client/pages/home.client.dart';
 import 'package:ipet/controller/login.dart';
 import 'package:ipet/misc/snackbar.dart';
 import 'package:ipet/misc/themestyle.dart';
 import 'package:ipet/utils/firebasehook.dart';
 import 'package:ipet/veterinary/home.vet.dart';
-import 'package:ipet/veterinary/pages/main.home.dart';
 // import 'package:location/location.dart';
 
 class MappController extends StatefulWidget {
   final String documentID;
   final bool ishome;
+  final bool isclient;
   const MappController(
-      {super.key, required this.documentID, required this.ishome});
+      {super.key,
+      required this.documentID,
+      required this.ishome,
+      required this.isclient});
 
   @override
   State<MappController> createState() => _MappControllerState();
@@ -85,7 +89,11 @@ class _MappControllerState extends State<MappController> {
               child: FloatingActionButton(
                 backgroundColor: maincolor,
                 onPressed: () {
-                  isupload == false ? updatelatlong() : null;
+                  if (widget.isclient == false) {
+                    isupload == false ? updatelatlong() : null;
+                  } else {
+                    isupload == false ? updatelatlongclient() : null;
+                  }
                 },
                 child: isupload == false
                     ? const MainFont(
@@ -162,6 +170,35 @@ class _MappControllerState extends State<MappController> {
           .doc(widget.documentID)
           .update({"lat": latitude, "long": longtitude}).then((value) => {
                 checknavigate(),
+                setState(() {
+                  isupload = false;
+                }),
+              });
+    } catch (error) {
+      if (mounted) {
+        snackbar(context, "$error");
+      }
+      setState(() {
+        isupload = false;
+      });
+    }
+  }
+
+  Future<void> updatelatlongclient() async {
+    setState(() {
+      isupload = true;
+    });
+    try {
+      await usercred
+          .doc(widget.documentID)
+          .collection('client')
+          .doc(widget.documentID)
+          .set({"lat": latitude, "long": longtitude}).then((value) => {
+                Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const HomeClientMain()),
+                    (route) => false),
                 setState(() {
                   isupload = false;
                 }),

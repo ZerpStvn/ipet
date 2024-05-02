@@ -11,6 +11,7 @@ class VetMapping extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(),
       body: MappController(
+        isclient: false,
         documentID: documentID,
         ishome: ishome,
       ),

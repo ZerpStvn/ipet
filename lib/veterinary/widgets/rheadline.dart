@@ -1,27 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:ipet/misc/themestyle.dart';
 
 class SHeadline extends StatelessWidget {
   const SHeadline({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const Padding(
+    return Padding(
       padding: EdgeInsets.only(left: 25.0, right: 25.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Column(
+          const Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                "Popular Menu",
+                "Check Your Canlendar",
                 style: TextStyle(
                     color: Colors.black,
                     fontSize: 18,
                     fontWeight: FontWeight.normal),
               ),
               Text(
-                "The best food for you",
+                "view canlendar for appointment",
                 style: TextStyle(
                     color: Colors.grey,
                     fontSize: 12,
@@ -31,8 +32,7 @@ class SHeadline extends StatelessWidget {
           ),
           Text(
             "View More",
-            style: TextStyle(
-                color: Color(0xff15BE77), fontWeight: FontWeight.normal),
+            style: TextStyle(color: maincolor, fontWeight: FontWeight.normal),
           ),
         ],
       ),

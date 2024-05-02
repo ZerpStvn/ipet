@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:ipet/controller/map/mylocation.dart';
 import 'package:ipet/misc/themestyle.dart';
 import 'package:ipet/veterinary/pages/appointment.dart';
 import 'package:ipet/veterinary/pages/main.home.dart';
+import 'package:ipet/veterinary/pages/profilevet.dart';
 
 class HomeScreenVeterinary extends StatefulWidget {
   const HomeScreenVeterinary({super.key});
@@ -18,6 +20,13 @@ class _HomeScreenVeterinaryState extends State<HomeScreenVeterinary> {
       return const MainHomeVet();
     } else if (_selectedIndex == 1) {
       return const AppointmentVet();
+    } else if (_selectedIndex == 2) {
+      return SizedBox(
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height * 0.83,
+          child: const MyLocation());
+    } else if (_selectedIndex == 3) {
+      return const VeterinaryProfile();
     } else {
       return const MainHomeVet();
     }
@@ -114,15 +123,12 @@ class IconBottomBar extends StatelessWidget {
           onPressed: onPressed,
           icon: Icon(
             icon,
-            color: selected ? const Color(0xff15BE77) : Colors.white,
+            color: Colors.white,
           ),
         ),
         Text(
           text,
-          style: TextStyle(
-              fontSize: 14,
-              height: .1,
-              color: selected ? const Color(0xff15BE77) : Colors.white),
+          style: const TextStyle(fontSize: 14, height: .1, color: Colors.white),
         )
       ],
     );
