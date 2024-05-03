@@ -1,11 +1,10 @@
 // ignore_for_file: file_names
 
 import 'dart:async';
+import 'dart:ffi';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:ipet/client/controller/listofclinic.dart';
 import 'package:ipet/misc/function.dart';
@@ -15,13 +14,15 @@ import 'package:ipet/model/users.dart';
 import 'package:provider/provider.dart';
 
 class ClientMapWidget extends StatefulWidget {
-  const ClientMapWidget({super.key});
+  final AuthProviderClass provider;
+  const ClientMapWidget({super.key, required this.provider});
 
   @override
   State<ClientMapWidget> createState() => _ClientMapWidgetState();
 }
 
-class _ClientMapWidgetState extends State<ClientMapWidget> {
+class _ClientMapWidgetState extends State<ClientMapWidget>
+    with TickerProviderStateMixin {
   final Completer<GoogleMapController> _controller =
       Completer<GoogleMapController>();
   final UsersModel usersModel = UsersModel();
@@ -36,16 +37,47 @@ class _ClientMapWidgetState extends State<ClientMapWidget> {
   String? imageprofile;
   String? vetidl;
   String? datestablished;
+  double aproximate = 10;
+  late AnimationController _anicontroller;
+  late Animation<double> _radiusAnimation;
 
+  static const double initialRadius = 1000;
+  late Future<Set<Marker>> _markersFuture;
   @override
   void initState() {
     super.initState();
+    _markersFuture = createMarkers(widget.provider);
+    _anicontroller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500), // Duration for the animation
+    );
+    _radiusAnimation = Tween<double>(
+      begin: initialRadius, // Initial radius
+      end: initialRadius, // New radius (can be dynamically changed)
+    ).animate(_anicontroller);
   }
 
   @override
   void dispose() {
     super.dispose();
     searchplace.dispose();
+    _anicontroller.dispose();
+  }
+
+  void updateRadius(double newRadius) {
+    _anicontroller.reset();
+    _anicontroller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500), // Duration for the animation
+    );
+    _radiusAnimation = Tween<double>(
+      begin: _radiusAnimation.value,
+      end: newRadius,
+    ).animate(_anicontroller)
+      ..addListener(() {
+        setState(() {});
+      });
+    _anicontroller.forward();
   }
 
   Future<Set<Marker>> createMarkers(AuthProviderClass provider) async {
@@ -64,16 +96,35 @@ class _ClientMapWidgetState extends State<ClientMapWidget> {
     List<Map<String, dynamic>> vetLocations = await getVetLocations();
 
     for (var location in vetLocations) {
-      double lat = location['lat'];
-      double lon = location['long'];
-      String name = location['clinicname'];
-      Marker vetMarker = Marker(
-        markerId: MarkerId("location$lat"),
-        position: LatLng(lat, lon),
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRose),
-        infoWindow: InfoWindow(title: name),
-      );
-      markers.add(vetMarker);
+      if (location["valid"] == 1) {
+        double lat = location['lat'];
+        double lon = location['long'];
+        String name = location['clinicname'];
+        Marker vetMarker = Marker(
+          markerId: MarkerId("location$lat"),
+          position: LatLng(lat, lon),
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRose),
+          infoWindow: InfoWindow(title: name),
+        );
+        markers.add(vetMarker);
+      } else {}
+      // double distance = calculateDistance(
+      //     userLat, userLon, location['lat'], location['long']);
+      // if (distance <= aproximate) {
+      //   if (location["valid"] == 1) {
+      //     double lat = location['lat'];
+      //     double lon = location['long'];
+      //     String name = location['clinicname'];
+      //     Marker vetMarker = Marker(
+      //       markerId: MarkerId("location$lat"),
+      //       position: LatLng(lat, lon),
+      //       icon:
+      //           BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRose),
+      //       infoWindow: InfoWindow(title: name),
+      //     );
+      //     markers.add(vetMarker);
+      //   } else {}
+      // }
     }
 
     return markers;
@@ -89,10 +140,12 @@ class _ClientMapWidgetState extends State<ClientMapWidget> {
       double lat = double.parse(doc['lat']);
       double lon = double.parse(doc['long']);
       String name = doc['clinicname'];
+      int valid = doc['valid'];
       vetLocations.add({
         'id': doc.id,
         'lat': lat,
         'long': lon,
+        'valid': valid,
         'clinicname': name,
       });
     }
@@ -109,11 +162,11 @@ class _ClientMapWidgetState extends State<ClientMapWidget> {
             width: MediaQuery.of(context).size.width * 99,
             height: 699,
             child: FutureBuilder<Set<Marker>>(
-              future: createMarkers(provider),
+              future: _markersFuture,
               builder:
                   (BuildContext context, AsyncSnapshot<Set<Marker>> snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Container(); // Or any loading indicator
+                  return Container();
                 } else if (snapshot.hasError) {
                   return Text('Error: ${snapshot.error}');
                 } else {
@@ -127,6 +180,17 @@ class _ClientMapWidgetState extends State<ClientMapWidget> {
                       }
                     },
                     markers: snapshot.data!,
+                    circles: {
+                      Circle(
+                        circleId: CircleId('userCircle'),
+                        center: LatLng(
+                            double.parse("${provider.usermapping!.lat}"),
+                            double.parse("${provider.usermapping!.long}")),
+                        radius: _radiusAnimation.value,
+                        fillColor: Colors.blue.withOpacity(0.3),
+                        strokeWidth: 0,
+                      ),
+                    },
                   );
                 }
               },
@@ -147,7 +211,7 @@ class _ClientMapWidgetState extends State<ClientMapWidget> {
           //   ),
           // ),
           Positioned(
-              top: 12,
+              top: 52,
               left: 10,
               right: 10,
               child: SizedBox(
@@ -205,7 +269,9 @@ class _ClientMapWidgetState extends State<ClientMapWidget> {
                             ],
                           ),
                           child: IconButton(
-                              onPressed: () {},
+                              onPressed: () {
+                                updateRadius(1600);
+                              },
                               icon: const Icon(
                                 Icons.tune_outlined,
                                 color: Colors.white,

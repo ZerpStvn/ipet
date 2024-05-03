@@ -1,6 +1,6 @@
 // ignore_for_file: file_names
 
-import 'dart:math' show cos, sqrt, sin, atan2, pi;
+import 'dart:math' show cos, sqrt, sin, atan2, pi, pow;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 

@@ -17,24 +17,30 @@ class ClientHomeWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-        future: usercred
-            .doc("${provider.userModel!.vetid}")
-            .collection('client')
-            .doc("${provider.userModel!.vetid}")
-            .get(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(
-              child: LinearProgressIndicator(
-                color: maincolor,
-              ),
-            );
-          } else if (!snapshot.hasData || !snapshot.data!.exists) {
-            return const SignClientLocation();
-          } else {
-            return const ManClientPage();
-          }
-        });
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 35),
+        FutureBuilder(
+            future: usercred
+                .doc("${provider.userModel!.vetid}")
+                .collection('client')
+                .doc("${provider.userModel!.vetid}")
+                .get(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(
+                  child: LinearProgressIndicator(
+                    color: maincolor,
+                  ),
+                );
+              } else if (!snapshot.hasData || !snapshot.data!.exists) {
+                return const SignClientLocation();
+              } else {
+                return const ManClientPage();
+              }
+            }),
+      ],
+    );
   }
 }

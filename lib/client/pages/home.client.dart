@@ -21,7 +21,9 @@ class _HomeClientMainState extends State<HomeClientMain> {
     if (_atpage == 0) {
       return ClientHomeWidget(provider: provider);
     } else if (_atpage == 2) {
-      return const ClientMapWidget();
+      return ClientMapWidget(
+        provider: provider,
+      );
     }
     return ClientHomeWidget(provider: provider);
   }
@@ -29,17 +31,12 @@ class _HomeClientMainState extends State<HomeClientMain> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      extendBody: true,
+      extendBody: false,
       body: SingleChildScrollView(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            const SizedBox(
-              height: 65,
-            ),
-            pagerender()
-          ],
+          children: [pagerender()],
         ),
       ),
       bottomNavigationBar: CurvedNavigationBar(

@@ -6,7 +6,10 @@ import 'package:ipet/model/Authprovider.dart';
 
 class DisplayListofClinic extends StatelessWidget {
   final AuthProviderClass provider;
-  const DisplayListofClinic({super.key, required this.provider});
+  const DisplayListofClinic({
+    super.key,
+    required this.provider,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -22,11 +25,8 @@ class DisplayListofClinic extends StatelessWidget {
             );
           }
           if (snapshot.hasError) {
-            return Center(
-              child: Text('Error: ${snapshot.error}'),
-            );
+            debugPrint('Error: ${snapshot.error}');
           }
-
           double userLat = double.parse("${provider.usermapping!.lat}");
           double maxRadius = 10;
           double userLon = double.parse("${provider.usermapping!.long}");
@@ -42,6 +42,7 @@ class DisplayListofClinic extends StatelessWidget {
               var vet = nearbyVets[index];
               List<dynamic> services = vet["services"];
               String vetID = vet.id;
+
               List<Widget> displayedServices = services
                   .sublist(0, services.length > 2 ? 2 : services.length)
                   .map<Widget>((service) {
@@ -55,71 +56,77 @@ class DisplayListofClinic extends StatelessWidget {
                   ),
                 );
               }).toList();
-              return SizedBox(
-                  width: 310,
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: 8.0, left: 9.0),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 9.0, vertical: 2),
-                      decoration: const BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.all(Radius.circular(10))),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          Row(
-                            children: [
-                              Container(
-                                width: 100,
-                                height: 80,
-                                decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(10),
-                                    image: DecorationImage(
-                                        fit: BoxFit.cover,
-                                        image: NetworkImage(
-                                            "${vet["imageprofile"]}"))),
-                              ),
-                              const SizedBox(
-                                width: 10,
-                              ),
-                              SizedBox(
-                                width: 140,
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    MainFont(title: "${vet["clinicname"]}"),
-                                    MainFont(
-                                        title:
-                                            "Distance: ${calculateDistance(userLat, userLon, double.parse("${vet['lat']}"), double.parse("${vet['long']}")).toStringAsFixed(2)} km"),
-                                    MainFont(
-                                      title: "Reviews 4.4",
-                                      color: maincolor,
-                                    ),
-                                  ],
+              if (vet['valid'] == 1) {
+                return SizedBox(
+                    width: 310,
+                    child: Padding(
+                      padding: const EdgeInsets.only(right: 8.0, left: 9.0),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 9.0, vertical: 2),
+                        decoration: const BoxDecoration(
+                            color: Colors.white,
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(10))),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const SizedBox(
+                              height: 10,
+                            ),
+                            Row(
+                              children: [
+                                Container(
+                                  width: 100,
+                                  height: 80,
+                                  decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(10),
+                                      image: DecorationImage(
+                                          fit: BoxFit.cover,
+                                          image: NetworkImage(
+                                              "${vet["imageprofile"]}"))),
                                 ),
-                              )
-                            ],
-                          ),
-                          const SizedBox(
-                            height: 8,
-                          ),
-                          Wrap(
-                            spacing: 4.0,
-                            runSpacing: 4.0,
-                            children: displayedServices,
-                          )
-                        ],
+                                const SizedBox(
+                                  width: 10,
+                                ),
+                                SizedBox(
+                                  width: 140,
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      MainFont(title: "${vet["clinicname"]}"),
+                                      MainFont(
+                                          title:
+                                              "Distance: ${calculateDistance(userLat, userLon, double.parse("${vet['lat']}"), double.parse("${vet['long']}")).toStringAsFixed(2)} km"),
+                                      MainFont(
+                                        title: "Reviews 4.4",
+                                        color: maincolor,
+                                      ),
+                                    ],
+                                  ),
+                                )
+                              ],
+                            ),
+                            const SizedBox(
+                              height: 8,
+                            ),
+                            Wrap(
+                              spacing: 4.0,
+                              runSpacing: 4.0,
+                              children: displayedServices,
+                            )
+                          ],
+                        ),
                       ),
-                    ),
-                  )
+                    )
 
-                  // You can add more information or customize the ListTile as needed
+                    // You can add more information or customize the ListTile as needed
 
-                  );
+                    );
+              } else {
+                return Container();
+              }
             },
           );
         },
