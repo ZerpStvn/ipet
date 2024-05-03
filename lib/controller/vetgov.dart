@@ -127,7 +127,7 @@ class _VetGovControllerState extends State<VetGovController> {
               .doc(widget.documentID)
               .update({
             "tin": tinid,
-            "dit": dtifile,
+            "dti": dtifile,
             "bir": birfile,
           }).then((value) {
             ishome();

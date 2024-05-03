@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:ipet/controller/fieldTags.dart';
 import 'package:ipet/controller/vetgov.dart';
-import 'package:ipet/controller/vetmap.dart';
 import 'package:ipet/misc/formtext.dart';
 import 'package:ipet/misc/themestyle.dart';
 import 'package:ipet/model/vetirinary.dart';

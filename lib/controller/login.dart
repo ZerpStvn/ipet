@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:ipet/client/pages/home.client.dart';
 import 'package:ipet/controller/selecttype.dart';
@@ -216,32 +215,31 @@ class _GloballoginControllerState extends State<GloballoginController> {
           isloggingin = false;
         });
       }
-    } catch (error) {
+    } on FirebaseException catch (error) {
       setState(() {
-        // switch (error.code) {
-        //   case "invalid-email":
-        //     debugPrint("Your email address is invalid.");
-        //     break;
-        //   case "wrong-password":
-        //     debugPrint("Your password is wrong.");
-        //     break;
-        //   case "user-not-found":
-        //     debugPrint("User with this email doesn't exist.");
-        //     break;
-        //   case "user-disabled":
-        //     debugPrint("User with this email has been disabled.");
-        //     break;
-        //   case "too-many-requests":
-        //     debugPrint("Too many requests");
-        //     break;
-        //   case "operation-not-allowed":
-        //     debugPrint("Signing in with Email and Password is not enabled.");
-        //     break;
-        //   default:
-        //     snackbar(context, "Check your email, password and try again");
-        // }
+        switch (error.code) {
+          case "invalid-email":
+            debugPrint("Your email address is invalid.");
+            break;
+          case "wrong-password":
+            debugPrint("Your password is wrong.");
+            break;
+          case "user-not-found":
+            debugPrint("User with this email doesn't exist.");
+            break;
+          case "user-disabled":
+            debugPrint("User with this email has been disabled.");
+            break;
+          case "too-many-requests":
+            debugPrint("Too many requests");
+            break;
+          case "operation-not-allowed":
+            debugPrint("Signing in with Email and Password is not enabled.");
+            break;
+          default:
+            snackbar(context, "Check your email, password and try again");
+        }
 
-        debugPrint("${error}");
         isloggingin = false;
       });
     }
