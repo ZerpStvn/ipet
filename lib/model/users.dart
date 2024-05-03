@@ -34,6 +34,20 @@ class UsersModel {
       pass: map['pass'],
     );
   }
+
+  factory UsersModel.getdomap(Map<String, dynamic> map) {
+    return UsersModel(
+      vetid: map['vetid'],
+      imageprofile: map['imageprofile'],
+      role: map['role'],
+      nameclinic: map['nameclinic'],
+      fname: map['fname'],
+      lname: map['lname'],
+      pnum: map['pnum'],
+      email: map['email'],
+      pass: map['pass'],
+    );
+  }
   Map<String, dynamic> usersModelmap() {
     return {
       'vetid': vetid,

@@ -47,7 +47,10 @@ dependencies:
   firebase_storage: ^11.7.4
   cloud_firestore: ^4.17.2
   textfield_tags: ^3.0.1
-  location: ^6.0.1
+  provider: ^6.1.2
+  flutter_geo_hash: ^0.0.4
+  curved_navigation_bar: ^1.0.3
+  # location: ^6.0.1
 
 dev_dependencies:
   flutter_test:
@@ -74,6 +77,7 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/
+    - assets/services/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:ipet/controller/signup.dart';
-import 'package:ipet/controller/vetmap.dart';
 import 'package:ipet/misc/themestyle.dart';
 
 class SelectTypeUser extends StatefulWidget {
@@ -32,6 +30,7 @@ class _SelectTypeUserState extends State<SelectTypeUser> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
         surfaceTintColor: Colors.white,
       ),
       body: Column(
@@ -79,17 +78,12 @@ class _SelectTypeUserState extends State<SelectTypeUser> {
                 padding: const EdgeInsets.all(8.0),
                 child: GestureDetector(
                   onTap: () {
+                    Navigator.pushNamed(context, items['route']);
                     // Navigator.push(
                     //     context,
                     //     MaterialPageRoute(
                     //         builder: (context) =>
                     //             SignupController(isvet: items['isvet'])));
-
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) =>
-                                VetMapping(documentID: "233")));
                   },
                   child: Column(
                     children: [

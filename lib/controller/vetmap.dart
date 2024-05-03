@@ -1,20 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:ipet/controller/mapController.dart';
 
-class VetMapping extends StatefulWidget {
+class VetMapping extends StatelessWidget {
   final String documentID;
-  const VetMapping({super.key, required this.documentID});
+  final bool ishome;
+  final bool isclient;
+  const VetMapping(
+      {super.key,
+      required this.documentID,
+      required this.ishome,
+      required this.isclient});
 
-  @override
-  State<VetMapping> createState() => _VetMappingState();
-}
-
-class _VetMappingState extends State<VetMapping> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(),
-      body: MappController(),
+      body: MappController(
+        isclient: isclient,
+        documentID: documentID,
+        ishome: ishome,
+      ),
     );
   }
 }
