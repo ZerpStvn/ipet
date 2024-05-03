@@ -13,21 +13,6 @@ class NearClinicView extends StatefulWidget {
 }
 
 class _NearClinicViewState extends State<NearClinicView> {
-  List<DocumentSnapshot> filterVetsByProximity(double userLat, double userLon,
-      double maxRadius, List<DocumentSnapshot> vets) {
-    List<DocumentSnapshot> nearbyVets = [];
-    for (var vet in vets) {
-      double vetLat = double.parse("${vet['lat']}");
-      double vetLon = double.parse("${vet['long']}");
-      double distance =
-          calculateDistance(userLat, userLon, vetLat, vetLon); // Distance in km
-      if (distance <= maxRadius) {
-        nearbyVets.add(vet);
-      }
-    }
-    return nearbyVets;
-  }
-
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<AuthProviderClass>(context);

@@ -48,6 +48,8 @@ class _MyLocationState extends State<MyLocation> {
       );
     }
     return GoogleMap(
+      myLocationButtonEnabled: false,
+      myLocationEnabled: false,
       markers: markers,
       mapType: MapType.normal,
       initialCameraPosition: _kGooglePlex,

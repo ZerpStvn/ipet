@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:ipet/controller/login.dart';
-import 'package:ipet/controller/vetgov.dart';
+import 'package:ipet/controller/vetmap.dart';
 import 'package:ipet/misc/formtext.dart';
 import 'package:ipet/misc/snackbar.dart';
 import 'package:ipet/misc/themestyle.dart';
@@ -79,7 +79,7 @@ class _ClientRegisterState extends State<ClientRegister> {
     return downloadURL;
   }
 
-  Future<void> handlecreateuser() async {
+  Future<void> handlecreateuser(userdred) async {
     usersModel.imageprofile = await uploadImageToFirebase(xFile!.path);
     usersModel.nameclinic = "";
     usersModel.fname = ownersfirstname.text;
@@ -98,7 +98,11 @@ class _ClientRegisterState extends State<ClientRegister> {
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => const GloballoginController()));
+                        builder: (context) => VetMapping(
+                              isclient: true,
+                              ishome: false,
+                              documentID: userdred,
+                            )));
               })
             });
   }
@@ -113,7 +117,7 @@ class _ClientRegisterState extends State<ClientRegister> {
           await userAuth
               .createUserWithEmailAndPassword(
                   email: emailaddress.text, password: password.text)
-              .then((value) => handlecreateuser());
+              .then((value) => handlecreateuser(value.user!.uid));
         } else {
           setState(() {
             imageprofile = "Add your profile picture";

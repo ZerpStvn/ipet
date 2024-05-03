@@ -2,6 +2,8 @@
 
 import 'dart:math' show cos, sqrt, sin, atan2, pi;
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 String splitWords(String words) {
   List<String> wordList = words.split(RegExp(r'\s+'));
   String firstWord = wordList[0];
@@ -31,4 +33,19 @@ double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
 
 double _toRadians(double degree) {
   return degree * (pi / 180);
+}
+
+List<DocumentSnapshot> filterVetsByProximity(double userLat, double userLon,
+    double maxRadius, List<DocumentSnapshot> vets) {
+  List<DocumentSnapshot> nearbyVets = [];
+  for (var vet in vets) {
+    double vetLat = double.parse("${vet['lat']}");
+    double vetLon = double.parse("${vet['long']}");
+    double distance =
+        calculateDistance(userLat, userLon, vetLat, vetLon); // Distance in km
+    if (distance <= maxRadius) {
+      nearbyVets.add(vet);
+    }
+  }
+  return nearbyVets;
 }

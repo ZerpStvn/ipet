@@ -4,8 +4,6 @@ import 'package:ipet/client/pages/nearclinic.dart';
 import 'package:ipet/client/widgets/Topprofile.dart';
 import 'package:ipet/client/widgets/search.dart';
 import 'package:ipet/client/widgets/services.dart';
-import 'package:ipet/misc/function.dart';
-import 'package:ipet/misc/themestyle.dart';
 import 'package:ipet/model/Authprovider.dart';
 import 'package:provider/provider.dart';
 

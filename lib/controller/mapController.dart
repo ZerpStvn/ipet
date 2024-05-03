@@ -194,11 +194,23 @@ class _MappControllerState extends State<MappController> {
           .collection('client')
           .doc(widget.documentID)
           .set({"lat": latitude, "long": longtitude}).then((value) => {
-                Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const HomeClientMain()),
-                    (route) => false),
+                if (widget.ishome == false)
+                  {
+                    Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                const GloballoginController()),
+                        (route) => false),
+                  }
+                else
+                  {
+                    Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const HomeClientMain()),
+                        (route) => false),
+                  },
                 setState(() {
                   isupload = false;
                 }),

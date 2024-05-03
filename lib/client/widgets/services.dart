@@ -13,7 +13,7 @@ class ServicesOffered extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Padding(
-          padding: const EdgeInsets.only(top: 40),
+          padding: EdgeInsets.only(top: 40),
           child: MainFont(
             title: "Services",
             fsize: 18,

@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:ipet/controller/uploadimagefield.dart';
-import 'package:ipet/controller/vetcred.dart';
+import 'package:ipet/controller/vetmap.dart';
 import 'package:ipet/misc/formtext.dart';
 import 'package:ipet/misc/snackbar.dart';
 import 'package:ipet/misc/themestyle.dart';
@@ -14,8 +14,11 @@ import 'package:ipet/utils/firebasehook.dart';
 class VetGovController extends StatefulWidget {
   final String documentID;
   final bool ishome;
-  const VetGovController(
-      {super.key, required this.documentID, required this.ishome});
+  const VetGovController({
+    super.key,
+    required this.documentID,
+    required this.ishome,
+  });
 
   @override
   State<VetGovController> createState() => _VetGovControllerState();
@@ -115,15 +118,18 @@ class _VetGovControllerState extends State<VetGovController> {
         });
       } else {
         if (_formkey.currentState!.validate()) {
-          veterinaryModel.bir = await uploadImageToFirebaseBIR(xfilebir!.path);
-          veterinaryModel.dti = await uploadImageToFirebaseDTI(xfiledti!.path);
-          veterinaryModel.tin = tinID.text;
+          String birfile = await uploadImageToFirebaseBIR(xfilebir!.path);
+          String dtifile = await uploadImageToFirebaseDTI(xfiledti!.path);
+          String tinid = tinID.text;
           await usercred
               .doc(widget.documentID)
               .collection('vertirenary')
               .doc(widget.documentID)
-              .set(veterinaryModel.veterinarymap())
-              .then((value) {
+              .update({
+            "tin": tinid,
+            "dit": dtifile,
+            "bir": birfile,
+          }).then((value) {
             ishome();
             setState(() {
               isuploading = false;
@@ -149,7 +155,11 @@ class _VetGovControllerState extends State<VetGovController> {
       Navigator.push(
           context,
           MaterialPageRoute(
-              builder: (context) => VetCreds(documentID: widget.documentID)));
+              builder: (context) => VetMapping(
+                    documentID: widget.documentID,
+                    ishome: false,
+                    isclient: false,
+                  )));
     }
   }
 

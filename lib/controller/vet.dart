@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:ipet/controller/vetgov.dart';
+import 'package:ipet/controller/vetcred.dart';
 import 'package:ipet/misc/formtext.dart';
 import 'package:ipet/misc/snackbar.dart';
 import 'package:ipet/misc/themestyle.dart';
@@ -81,7 +81,8 @@ class _VetControllerState extends State<VetController> {
   }
 
   Future<void> handlecreateuser() async {
-    usersModel.imageprofile = await uploadImageToFirebase(xFile!.path);
+    String userprofleurl = await uploadImageToFirebase(xFile!.path);
+    usersModel.imageprofile = userprofleurl;
     usersModel.nameclinic = nameofclinic.text;
     usersModel.fname = ownersfirstname.text;
     usersModel.lname = ownerslastname.text;
@@ -99,9 +100,10 @@ class _VetControllerState extends State<VetController> {
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => VetGovController(
+                        builder: (context) => VetCreds(
                               documentID: userAuth.currentUser!.uid,
-                              ishome: false,
+                              clinicname: nameofclinic.text,
+                              imageprofile: userprofleurl,
                             )));
               })
             });

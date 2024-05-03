@@ -119,7 +119,7 @@ class _GloballoginControllerState extends State<GloballoginController> {
                 const SizedBox(
                   height: 15,
                 ),
-                const Text("Email address"),
+                const Text("Passowd"),
                 const SizedBox(
                   height: 5,
                 ),
@@ -216,31 +216,32 @@ class _GloballoginControllerState extends State<GloballoginController> {
           isloggingin = false;
         });
       }
-    } on FirebaseAuthException catch (error) {
+    } catch (error) {
       setState(() {
-        switch (error.code) {
-          case "invalid-email":
-            debugPrint("Your email address is invalid.");
-            break;
-          case "wrong-password":
-            debugPrint("Your password is wrong.");
-            break;
-          case "user-not-found":
-            debugPrint("User with this email doesn't exist.");
-            break;
-          case "user-disabled":
-            debugPrint("User with this email has been disabled.");
-            break;
-          case "too-many-requests":
-            debugPrint("Too many requests");
-            break;
-          case "operation-not-allowed":
-            debugPrint("Signing in with Email and Password is not enabled.");
-            break;
-          default:
-            snackbar(context, "Check your email, password and try again");
-        }
+        // switch (error.code) {
+        //   case "invalid-email":
+        //     debugPrint("Your email address is invalid.");
+        //     break;
+        //   case "wrong-password":
+        //     debugPrint("Your password is wrong.");
+        //     break;
+        //   case "user-not-found":
+        //     debugPrint("User with this email doesn't exist.");
+        //     break;
+        //   case "user-disabled":
+        //     debugPrint("User with this email has been disabled.");
+        //     break;
+        //   case "too-many-requests":
+        //     debugPrint("Too many requests");
+        //     break;
+        //   case "operation-not-allowed":
+        //     debugPrint("Signing in with Email and Password is not enabled.");
+        //     break;
+        //   default:
+        //     snackbar(context, "Check your email, password and try again");
+        // }
 
+        debugPrint("${error}");
         isloggingin = false;
       });
     }

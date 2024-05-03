@@ -90,6 +90,7 @@ class _PromoCardState extends State<PromoCard> {
                           builder: (context) => VetMapping(
                                 documentID: widget.documentID,
                                 ishome: true,
+                                isclient: false,
                               )));
                 },
                 child: const MainFont(

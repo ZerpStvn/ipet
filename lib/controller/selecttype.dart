@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:ipet/controller/signup.dart';
 import 'package:ipet/misc/themestyle.dart';
 
 class SelectTypeUser extends StatefulWidget {

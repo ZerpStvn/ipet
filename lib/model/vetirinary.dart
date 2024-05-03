@@ -2,13 +2,15 @@ class VeterinaryModel {
   String? tin;
   String? dti;
   String? bir;
-  List? operation;
-  List? services;
-  List? specialties;
+  List<dynamic>? operation;
+  List<dynamic>? services;
+  List<dynamic>? specialties;
   String? description;
   String? lat;
   String? long;
   int? valid;
+  String? clinicname;
+  String? imageprofile;
   String? dateestablished;
 
   VeterinaryModel(
@@ -18,10 +20,12 @@ class VeterinaryModel {
       this.bir,
       this.operation,
       this.services,
+      this.imageprofile,
       this.specialties,
       this.description,
       this.lat,
       this.long,
+      this.clinicname,
       this.dateestablished});
 
   factory VeterinaryModel.getdocument(map) {
@@ -30,6 +34,8 @@ class VeterinaryModel {
       tin: map['tin'],
       dti: map['dti'],
       bir: map['bir'],
+      imageprofile: map['imageprofile'],
+      clinicname: map['clinicname'],
       operation: map['operation'],
       services: map['services'],
       specialties: map['specialties'],
@@ -44,8 +50,10 @@ class VeterinaryModel {
     return {
       'valid': 0,
       "tin": tin,
+      "clinicname": clinicname,
       "dti": dti,
       "bir": bir,
+      "imageprofile": imageprofile,
       "operation": operation,
       "services": services,
       "specialties": specialties,

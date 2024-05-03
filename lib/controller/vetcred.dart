@@ -1,15 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:ipet/controller/fieldTags.dart';
+import 'package:ipet/controller/vetgov.dart';
 import 'package:ipet/controller/vetmap.dart';
 import 'package:ipet/misc/formtext.dart';
 import 'package:ipet/misc/themestyle.dart';
+import 'package:ipet/model/vetirinary.dart';
 import 'package:ipet/utils/firebasehook.dart';
 import 'package:textfield_tags/textfield_tags.dart';
 
 class VetCreds extends StatefulWidget {
   final String documentID;
-  const VetCreds({super.key, required this.documentID});
+  final String clinicname;
+  final String imageprofile;
+  const VetCreds(
+      {super.key,
+      required this.documentID,
+      required this.clinicname,
+      required this.imageprofile});
 
   @override
   State<VetCreds> createState() => _VetCredsState();
@@ -26,7 +34,7 @@ class _VetCredsState extends State<VetCreds> {
   late double _distanceSpecialties;
   late double _distanceToField;
   bool isupload = false;
-
+  final VeterinaryModel veterinaryModel = VeterinaryModel();
   List<String> servicetags = [];
   List<String> specialtiesList = [];
   @override
@@ -58,23 +66,25 @@ class _VetCredsState extends State<VetCreds> {
     });
     try {
       if (_formkey.currentState!.validate()) {
+        veterinaryModel.clinicname = widget.clinicname;
+        veterinaryModel.imageprofile = widget.imageprofile;
+        veterinaryModel.operation = clinicSchedule;
+        veterinaryModel.services = servicetags;
+        veterinaryModel.specialties = specialtiesList;
+        veterinaryModel.description = description.text;
+        veterinaryModel.dateestablished = dateEstablished.text;
         await usercred
             .doc(widget.documentID)
             .collection('vertirenary')
             .doc(widget.documentID)
-            .update({
-          "operation": clinicSchedule,
-          "services": servicetags,
-          "specialties": specialtiesList,
-          "description": description.text,
-          "dateestablished": dateEstablished.text,
-        }).then((value) {
+            .set(veterinaryModel.veterinarymap())
+            .then((value) {
           setState(() {
             isupload = false;
             Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => VetMapping(
+                    builder: (context) => VetGovController(
                           documentID: widget.documentID,
                           ishome: false,
                         )));
