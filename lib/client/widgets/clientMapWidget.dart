@@ -1,13 +1,11 @@
 // ignore_for_file: file_names
 
 import 'dart:async';
-import 'dart:ffi';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:ipet/client/controller/listofclinic.dart';
-import 'package:ipet/misc/function.dart';
 import 'package:ipet/misc/themestyle.dart';
 import 'package:ipet/model/Authprovider.dart';
 import 'package:ipet/model/users.dart';
@@ -40,8 +38,10 @@ class _ClientMapWidgetState extends State<ClientMapWidget>
   double aproximate = 10;
   late AnimationController _anicontroller;
   late Animation<double> _radiusAnimation;
-
+  bool isradactive = false;
+  double _currentSliderValue = 1;
   static const double initialRadius = 1000;
+  double radiusinkm = 2000;
   late Future<Set<Marker>> _markersFuture;
   @override
   void initState() {
@@ -49,11 +49,11 @@ class _ClientMapWidgetState extends State<ClientMapWidget>
     _markersFuture = createMarkers(widget.provider);
     _anicontroller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 500), // Duration for the animation
+      duration: const Duration(milliseconds: 500),
     );
     _radiusAnimation = Tween<double>(
-      begin: initialRadius, // Initial radius
-      end: initialRadius, // New radius (can be dynamically changed)
+      begin: initialRadius,
+      end: initialRadius,
     ).animate(_anicontroller);
   }
 
@@ -68,7 +68,7 @@ class _ClientMapWidgetState extends State<ClientMapWidget>
     _anicontroller.reset();
     _anicontroller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 500), // Duration for the animation
+      duration: const Duration(milliseconds: 500),
     );
     _radiusAnimation = Tween<double>(
       begin: _radiusAnimation.value,
@@ -154,6 +154,7 @@ class _ClientMapWidgetState extends State<ClientMapWidget>
 
   @override
   Widget build(BuildContext context) {
+    double heightsize = MediaQuery.of(context).size.height;
     final AuthProviderClass provider = Provider.of<AuthProviderClass>(context);
     return SingleChildScrollView(
       child: Stack(
@@ -182,7 +183,7 @@ class _ClientMapWidgetState extends State<ClientMapWidget>
                     markers: snapshot.data!,
                     circles: {
                       Circle(
-                        circleId: CircleId('userCircle'),
+                        circleId: const CircleId('userCircle'),
                         center: LatLng(
                             double.parse("${provider.usermapping!.lat}"),
                             double.parse("${provider.usermapping!.long}")),
@@ -229,17 +230,19 @@ class _ClientMapWidgetState extends State<ClientMapWidget>
                                 color: Colors.grey.withOpacity(0.5),
                                 spreadRadius: 2,
                                 blurRadius: 5,
-                                offset:
-                                    Offset(0, 3), // changes position of shadow
+                                offset: const Offset(
+                                    0, 3), // changes position of shadow
                               ),
                             ],
                           ),
                           child: TextFormField(
+                            readOnly: true,
+                            onTap: () {},
                             controller: searchplace,
                             decoration: InputDecoration(
                               filled: true,
                               fillColor: maincolor,
-                              hintStyle: TextStyle(color: Colors.white),
+                              hintStyle: const TextStyle(color: Colors.white),
                               hintText: "Search..",
                               border: OutlineInputBorder(
                                 borderSide: BorderSide.none,
@@ -263,14 +266,16 @@ class _ClientMapWidgetState extends State<ClientMapWidget>
                                 color: Colors.grey.withOpacity(0.5),
                                 spreadRadius: 2,
                                 blurRadius: 5,
-                                offset:
-                                    Offset(0, 3), // changes position of shadow
+                                offset: const Offset(
+                                    0, 3), // changes position of shadow
                               ),
                             ],
                           ),
                           child: IconButton(
                               onPressed: () {
-                                updateRadius(1600);
+                                setState(() {
+                                  isradactive = !isradactive;
+                                });
                               },
                               icon: const Icon(
                                 Icons.tune_outlined,
@@ -280,8 +285,60 @@ class _ClientMapWidgetState extends State<ClientMapWidget>
                       )
                     ],
                   ))),
+
+          isradactive == true
+              ? Positioned(
+                  top: 112,
+                  left: 10,
+                  right: 10,
+                  child: Container(
+                    padding: const EdgeInsets.all(10),
+                    height: 150,
+                    decoration: BoxDecoration(
+                        color: maincolor,
+                        borderRadius: BorderRadius.circular(10)),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        MainFont(
+                          title: "Distance ${radiusinkm ~/ 1000} Km",
+                          fweight: FontWeight.bold,
+                          color: Colors.white,
+                          fsize: 20,
+                        ),
+                        const MainFont(
+                          title:
+                              "You Can adjust the distance of\nsearch to find more places",
+                          color: Colors.white,
+                          fsize: 12,
+                        ),
+                        Slider(
+                          max: 100,
+                          divisions: 100,
+                          label:
+                              '${(_currentSliderValue / 100 * 100).toStringAsFixed(1)} Km',
+                          value: _currentSliderValue,
+                          onChanged: (double value) {
+                            _currentSliderValue = value;
+                            setState(() {
+                              double newRadius = value * 1000;
+                              updateRadius(newRadius);
+                              radiusinkm = newRadius;
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              : Container(),
+
           Positioned(
-              bottom: 90, child: DisplayListofClinic(provider: provider)),
+              bottom: heightsize >= 185 ? 30 : 90,
+              child: DisplayListofClinic(
+                provider: provider,
+                maxRadius: radiusinkm,
+              )),
         ],
       ),
     );
