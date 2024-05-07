@@ -165,83 +165,99 @@ class _VetGovControllerState extends State<VetGovController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(18.0),
-          child: Form(
-            key: _formkey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "Goverment ID",
-                  style: TextStyle(
-                      fontSize: 25,
-                      color: maincolor,
-                      fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(
-                  height: 15,
-                ),
-                Container(
-                  height: 5,
-                  width: 70,
-                  decoration: BoxDecoration(
-                      color: maincolor, borderRadius: BorderRadius.circular(9)),
-                ),
-                const SizedBox(
-                  height: 25,
-                ),
-                const SizedBox(
-                  height: 15,
-                ),
-                Textformtype(
-                    textEditingController: tinID,
-                    uppertitle: "Provide TIN Number",
-                    fieldname: "000-000-000-00000",
-                    textvalidator: "TIN 000-000-000-00000"),
-                const SizedBox(
-                  height: 15,
-                ),
-                UploadImageField(
-                  title: "Upload DTI Permit",
-                  xfiledti: xfiledti,
-                  pickimage: () {
-                    pickimageDTI();
-                  },
-                ),
-                const SizedBox(
-                  height: 15,
-                ),
-                UploadImageField(
-                  title: "Upload BIR Permit",
-                  xfiledti: xfilebir,
-                  pickimage: () {
-                    pickimageBIR();
-                  },
-                ),
-                const SizedBox(
-                  height: 15,
-                ),
-                isuploading == false
-                    ? GlobalButton(
-                        callback: () {
-                          handlegovid();
-                          debugPrint("${widget.ishome}");
-                        },
-                        title: "Proceed")
-                    : Center(
-                        child: CircularProgressIndicator(
-                          color: maincolor,
-                        ),
-                      )
-              ],
+    return PopScope(
+      onPopInvoked: (didpop) async {
+        if (didpop) return;
+
+        await deleteuser();
+      },
+      child: Scaffold(
+        appBar: AppBar(),
+        body: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(18.0),
+            child: Form(
+              key: _formkey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Goverment ID",
+                    style: TextStyle(
+                        fontSize: 25,
+                        color: maincolor,
+                        fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(
+                    height: 15,
+                  ),
+                  Container(
+                    height: 5,
+                    width: 70,
+                    decoration: BoxDecoration(
+                        color: maincolor,
+                        borderRadius: BorderRadius.circular(9)),
+                  ),
+                  const SizedBox(
+                    height: 25,
+                  ),
+                  const SizedBox(
+                    height: 15,
+                  ),
+                  Textformtype(
+                      textEditingController: tinID,
+                      uppertitle: "Provide TIN Number",
+                      fieldname: "000-000-000-00000",
+                      textvalidator: "TIN 000-000-000-00000"),
+                  const SizedBox(
+                    height: 15,
+                  ),
+                  UploadImageField(
+                    title: "Upload DTI Permit",
+                    xfiledti: xfiledti,
+                    pickimage: () {
+                      pickimageDTI();
+                    },
+                  ),
+                  const SizedBox(
+                    height: 15,
+                  ),
+                  UploadImageField(
+                    title: "Upload BIR Permit",
+                    xfiledti: xfilebir,
+                    pickimage: () {
+                      pickimageBIR();
+                    },
+                  ),
+                  const SizedBox(
+                    height: 15,
+                  ),
+                  isuploading == false
+                      ? GlobalButton(
+                          callback: () {
+                            handlegovid();
+                            debugPrint("${widget.ishome}");
+                          },
+                          title: "Proceed")
+                      : Center(
+                          child: CircularProgressIndicator(
+                            color: maincolor,
+                          ),
+                        )
+                ],
+              ),
             ),
           ),
         ),
       ),
     );
+  }
+
+  Future<void> deleteuser() async {
+    try {
+      await usercred.doc(widget.documentID).delete();
+    } catch (e) {
+      debugPrint("error deleting user");
+    }
   }
 }

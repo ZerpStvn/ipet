@@ -41,11 +41,23 @@ List<DocumentSnapshot> filterVetsByProximity(double userLat, double userLon,
   for (var vet in vets) {
     double vetLat = double.parse("${vet['lat']}");
     double vetLon = double.parse("${vet['long']}");
-    double distance =
-        calculateDistance(userLat, userLon, vetLat, vetLon); // Distance in km
+    double distance = calculateDistance(userLat, userLon, vetLat, vetLon);
     if (distance <= maxRadius) {
       nearbyVets.add(vet);
     }
   }
   return nearbyVets;
+}
+
+bool hasClinicsWithinRadius(double userLat, double userLon, double maxRadius,
+    List<DocumentSnapshot> vets) {
+  for (var vet in vets) {
+    double vetLat = double.parse("${vet['lat']}");
+    double vetLon = double.parse("${vet['long']}");
+    double distance = calculateDistance(userLat, userLon, vetLat, vetLon);
+    if (distance <= maxRadius) {
+      return true;
+    }
+  }
+  return false;
 }

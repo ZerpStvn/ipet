@@ -143,7 +143,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
               padding: const EdgeInsets.all(8.0),
               child: GlobalButton(
                   callback: () {
-                    _currentIndex == 2
+                    _currentIndex == 1
                         ? saveonboarding().then((value) =>
                             Navigator.pushAndRemoveUntil(
                                 context,
