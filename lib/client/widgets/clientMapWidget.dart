@@ -6,6 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:ipet/client/controller/listofclinic.dart';
+import 'package:ipet/misc/function.dart';
 import 'package:ipet/misc/themestyle.dart';
 import 'package:ipet/model/Authprovider.dart';
 import 'package:ipet/model/users.dart';
@@ -40,8 +41,8 @@ class _ClientMapWidgetState extends State<ClientMapWidget>
   late Animation<double> _radiusAnimation;
   bool isradactive = false;
   double _currentSliderValue = 1;
-  static const double initialRadius = 1000;
-  double radiusinkm = 2000;
+  static const double initialRadius = 3000;
+  double radiusinkm = 3.99;
   late Future<Set<Marker>> _markersFuture;
   @override
   void initState() {
@@ -108,23 +109,23 @@ class _ClientMapWidgetState extends State<ClientMapWidget>
         );
         markers.add(vetMarker);
       } else {}
-      // double distance = calculateDistance(
-      //     userLat, userLon, location['lat'], location['long']);
-      // if (distance <= aproximate) {
-      //   if (location["valid"] == 1) {
-      //     double lat = location['lat'];
-      //     double lon = location['long'];
-      //     String name = location['clinicname'];
-      //     Marker vetMarker = Marker(
-      //       markerId: MarkerId("location$lat"),
-      //       position: LatLng(lat, lon),
-      //       icon:
-      //           BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRose),
-      //       infoWindow: InfoWindow(title: name),
-      //     );
-      //     markers.add(vetMarker);
-      //   } else {}
-      // }
+      double distance = calculateDistance(
+          userLat, userLon, location['lat'], location['long']);
+      if (distance <= aproximate) {
+        if (location["valid"] == 1) {
+          double lat = location['lat'];
+          double lon = location['long'];
+          String name = location['clinicname'];
+          Marker vetMarker = Marker(
+            markerId: MarkerId("location$lat"),
+            position: LatLng(lat, lon),
+            icon:
+                BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRose),
+            infoWindow: InfoWindow(title: name),
+          );
+          markers.add(vetMarker);
+        } else {}
+      }
     }
 
     return markers;
@@ -174,7 +175,12 @@ class _ClientMapWidgetState extends State<ClientMapWidget>
                   return GoogleMap(
                     zoomControlsEnabled: false,
                     mapType: MapType.normal,
-                    initialCameraPosition: _kGooglePlex,
+                    initialCameraPosition: CameraPosition(
+                        zoom: 13,
+                        target: LatLng(
+                            double.parse("${widget.provider.usermapping!.lat}"),
+                            double.parse(
+                                "${widget.provider.usermapping!.long}"))),
                     onMapCreated: (GoogleMapController controller) {
                       if (!_controller.isCompleted) {
                         _controller.complete(controller);
@@ -301,7 +307,7 @@ class _ClientMapWidgetState extends State<ClientMapWidget>
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         MainFont(
-                          title: "Distance ${radiusinkm ~/ 1000} Km",
+                          title: "Distance $radiusinkm Km",
                           fweight: FontWeight.bold,
                           color: Colors.white,
                           fsize: 20,
@@ -316,14 +322,14 @@ class _ClientMapWidgetState extends State<ClientMapWidget>
                           max: 100,
                           divisions: 100,
                           label:
-                              '${(_currentSliderValue / 100 * 100).toStringAsFixed(1)} Km',
+                              '${radiusinkm.toStringAsFixed(1)} Km', // Update label here
                           value: _currentSliderValue,
                           onChanged: (double value) {
-                            _currentSliderValue = value;
                             setState(() {
+                              _currentSliderValue = value;
                               double newRadius = value * 1000;
                               updateRadius(newRadius);
-                              radiusinkm = newRadius;
+                              radiusinkm = newRadius / 1000;
                             });
                           },
                         ),

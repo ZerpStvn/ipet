@@ -1,5 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:ipet/client/pages/clinicsingleview.dart';
+import 'package:ipet/client/pages/listofveterinary.dart';
 import 'package:ipet/misc/function.dart';
 import 'package:ipet/misc/themestyle.dart';
 import 'package:ipet/model/Authprovider.dart';
@@ -19,16 +22,23 @@ class _NearClinicViewState extends State<NearClinicView> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Row(
+        Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            MainFont(
+            const MainFont(
               title: "Clinic Near You",
               fsize: 20,
               fweight: FontWeight.w500,
             ),
-            Icon(Icons.location_on_outlined),
+            GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const ListofVeterinary()));
+                },
+                child: Icon(Icons.location_on_outlined)),
           ],
         ),
         // TextButton(
@@ -40,6 +50,7 @@ class _NearClinicViewState extends State<NearClinicView> {
         StreamBuilder(
           stream: FirebaseFirestore.instance
               .collectionGroup('vertirenary')
+              .limit(4)
               .snapshots(),
           builder:
               (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
@@ -62,13 +73,32 @@ class _NearClinicViewState extends State<NearClinicView> {
                 userLat, userLon, maxRadius, vetDocuments);
 
             return ListView.builder(
+              padding: const EdgeInsets.only(top: 10),
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemCount: nearbyVets.length,
               itemBuilder: (BuildContext context, int index) {
                 var vet = nearbyVets[index];
+                String vetID = vet.id;
                 return ListTile(
-                  title: Text(vet['dateestablished']),
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                ClinicViewSingle(documentID: vetID)));
+                  },
+                  leading: Container(
+                    height: 60,
+                    width: 80,
+                    decoration: BoxDecoration(
+                        color: const Color.fromARGB(80, 158, 158, 158),
+                        borderRadius: BorderRadius.circular(8),
+                        image: DecorationImage(
+                            fit: BoxFit.cover,
+                            image: NetworkImage("${vet['imageprofile']}"))),
+                  ),
+                  title: MainFont(title: "${vet['clinicname']}"),
                   subtitle: Text(
                     'Distance: ${calculateDistance(userLat, userLon, double.parse("${vet['lat']}"), double.parse("${vet['long']}")).toStringAsFixed(2)} km',
                   ),
