@@ -108,9 +108,11 @@ class _PromoCardState extends State<PromoCard> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 30),
-            const Text(
-              "We're happy to be part\nof your lovely fur family",
-              style: TextStyle(
+            Text(
+              widget.status == 1
+                  ? "Your Account is fully\nVerified"
+                  : "We are reviewing\nyour Account",
+              style: const TextStyle(
                   color: Colors.white,
                   fontSize: 17,
                   fontWeight: FontWeight.bold),

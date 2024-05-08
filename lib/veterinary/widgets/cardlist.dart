@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ipet/misc/themestyle.dart';
 
 class CardListView extends StatelessWidget {
   const CardListView({super.key});
@@ -9,7 +10,7 @@ class CardListView extends StatelessWidget {
       padding: const EdgeInsets.only(top: 25.0, right: 25.0, bottom: 15.0),
       child: SizedBox(
         width: MediaQuery.of(context).size.width,
-        height: 175,
+        height: 170,
         child: ListView(
           scrollDirection: Axis.horizontal,
           children: const [
@@ -79,13 +80,12 @@ class CardView extends StatelessWidget {
             const SizedBox(
               height: 5,
             ),
-            Text(
-              subtitle,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                  color: Colors.grey,
-                  fontWeight: FontWeight.normal,
-                  fontSize: 12),
+            MainFont(
+              title: subtitle,
+              align: TextAlign.center,
+              color: Colors.grey,
+              fweight: FontWeight.normal,
+              fsize: 12,
             ),
             const SizedBox(
               height: 10,
