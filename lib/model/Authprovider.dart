@@ -100,7 +100,7 @@ class AuthProviderClass extends ChangeNotifier {
     }
   }
 
-  Future<void> logout(BuildContext context) async {
+  Future<void> authmodellogot(BuildContext context) async {
     try {
       await FirebaseAuth.instance.signOut().then((value) =>
           Navigator.pushAndRemoveUntil(

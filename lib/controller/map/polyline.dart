@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_collection_literals
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -52,20 +54,21 @@ class _VetClinicUserClientPolylineState
     // Add user marker
     _markers.add(
       Marker(
-        markerId: MarkerId('userMarker'),
+        markerId: const MarkerId('userMarker'),
         position: LatLng(widget.userLat, widget.userLon),
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
-        infoWindow: InfoWindow(title: 'User'),
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+        infoWindow: const InfoWindow(title: 'User'),
       ),
     );
+    //
 
     // Add clinic marker
     _markers.add(
       Marker(
-        markerId: MarkerId('clinicMarker'),
+        markerId: const MarkerId('clinicMarker'),
         position: LatLng(widget.clinicLat, widget.clinicLon),
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
-        infoWindow: InfoWindow(title: 'Clinic'),
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRose),
+        infoWindow: const InfoWindow(title: 'Clinic'),
       ),
     );
 
@@ -74,7 +77,7 @@ class _VetClinicUserClientPolylineState
     if (routePoints.isNotEmpty) {
       // Add polyline
       Polyline polyline = Polyline(
-        polylineId: PolylineId('route'),
+        polylineId: const PolylineId('route'),
         points: routePoints,
         color: Colors.blue,
         width: 5,

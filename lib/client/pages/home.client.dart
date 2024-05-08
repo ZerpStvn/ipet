@@ -1,5 +1,6 @@
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:ipet/client/pages/profile.dart';
 import 'package:ipet/client/widgets/clientHomeWidget.dart';
 import 'package:ipet/client/widgets/clientMapWidget.dart';
 import 'package:ipet/misc/themestyle.dart';
@@ -24,6 +25,8 @@ class _HomeClientMainState extends State<HomeClientMain> {
       return ClientMapWidget(
         provider: provider,
       );
+    } else if (_atpage == 4) {
+      return const ClientProfile();
     }
     return ClientHomeWidget(provider: provider);
   }
@@ -31,6 +34,7 @@ class _HomeClientMainState extends State<HomeClientMain> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       extendBody: false,
       body: SingleChildScrollView(
         child: Column(

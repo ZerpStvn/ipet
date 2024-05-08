@@ -25,10 +25,10 @@ class _ClientMapWidgetState extends State<ClientMapWidget>
   final Completer<GoogleMapController> _controller =
       Completer<GoogleMapController>();
   final UsersModel usersModel = UsersModel();
-  static const CameraPosition _kGooglePlex = CameraPosition(
-    target: LatLng(10.720641, 122.553519),
-    zoom: 14.2746,
-  );
+  // static const CameraPosition _kGooglePlex = CameraPosition(
+  //   target: LatLng(10.720641, 122.553519),
+  //   zoom: 14.2746,
+  // );
   final BitmapDescriptor customMarkerIcon =
       BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure);
   final TextEditingController searchplace = TextEditingController();
@@ -314,7 +314,7 @@ class _ClientMapWidgetState extends State<ClientMapWidget>
                         ),
                         const MainFont(
                           title:
-                              "You Can adjust the distance of\nsearch to find more places",
+                              "You Can adjust the distance for\nsearch to find more places",
                           color: Colors.white,
                           fsize: 12,
                         ),
