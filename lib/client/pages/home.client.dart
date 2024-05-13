@@ -67,7 +67,7 @@ class _HomeClientMainState extends State<HomeClientMain> {
             color: Colors.white,
           ),
           Icon(
-            Icons.shopping_bag,
+            Icons.notifications,
             color: Colors.white,
           ),
           Icon(

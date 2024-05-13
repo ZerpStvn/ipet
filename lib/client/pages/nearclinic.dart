@@ -59,8 +59,8 @@ class _NearClinicViewState extends State<NearClinicView> {
               );
             }
             if (snapshot.hasError) {
-              return Center(
-                child: Text('Error: ${snapshot.error}'),
+              return const Center(
+                child: Text('Error, Unable to load Data'),
               );
             }
 
@@ -79,30 +79,35 @@ class _NearClinicViewState extends State<NearClinicView> {
               itemBuilder: (BuildContext context, int index) {
                 var vet = nearbyVets[index];
                 String vetID = vet.id;
-                return ListTile(
-                  onTap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) =>
-                                ClinicViewSingle(documentID: vetID)));
-                  },
-                  leading: Container(
-                    height: 60,
-                    width: 80,
-                    decoration: BoxDecoration(
-                        color: const Color.fromARGB(80, 158, 158, 158),
-                        borderRadius: BorderRadius.circular(8),
-                        image: DecorationImage(
-                            fit: BoxFit.cover,
-                            image: NetworkImage("${vet['imageprofile']}"))),
-                  ),
-                  title: MainFont(title: "${vet['clinicname']}"),
-                  subtitle: Text(
-                    'Distance: ${calculateDistance(userLat, userLon, double.parse("${vet['lat']}"), double.parse("${vet['long']}")).toStringAsFixed(2)} km',
-                  ),
-                  // You can add more information or customize the ListTile as needed
-                );
+                if (vet['valid'] == 1) {
+                  return ListTile(
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  ClinicViewSingle(documentID: vetID)));
+                    },
+                    leading: Container(
+                      height: 60,
+                      width: 80,
+                      decoration: BoxDecoration(
+                          color: const Color.fromARGB(80, 158, 158, 158),
+                          borderRadius: BorderRadius.circular(8),
+                          image: DecorationImage(
+                              fit: BoxFit.cover,
+                              image: NetworkImage("${vet['imageprofile']}"))),
+                    ),
+                    title: MainFont(title: "${vet['clinicname']}"),
+                    subtitle: Text(
+                      'Distance: ${calculateDistance(userLat, userLon, double.parse("${vet['lat']}"), double.parse("${vet['long']}")).toStringAsFixed(2)} km',
+                    ),
+
+                    // You can add more information or customize the ListTile as needed
+                  );
+                } else {
+                  return Container();
+                }
               },
             );
           },

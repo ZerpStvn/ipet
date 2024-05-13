@@ -6,6 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:ipet/client/controller/listofclinic.dart';
+import 'package:ipet/client/pages/searchpage.dart';
 import 'package:ipet/misc/function.dart';
 import 'package:ipet/misc/themestyle.dart';
 import 'package:ipet/model/Authprovider.dart';
@@ -243,7 +244,13 @@ class _ClientMapWidgetState extends State<ClientMapWidget>
                           ),
                           child: TextFormField(
                             readOnly: true,
-                            onTap: () {},
+                            onTap: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          const Searchpage()));
+                            },
                             controller: searchplace,
                             decoration: InputDecoration(
                               filled: true,

@@ -61,3 +61,26 @@ bool hasClinicsWithinRadius(double userLat, double userLon, double maxRadius,
   }
   return false;
 }
+
+Future<double> calculateRating(String documentID) async {
+  double totalRating = 0;
+  int reviewCount = 0;
+  CollectionReference ratingsCollection = FirebaseFirestore.instance
+      .collection('ratings')
+      .doc(documentID)
+      .collection('reviews');
+
+  QuerySnapshot querySnapshot = await ratingsCollection.get();
+
+  for (int i = 0; i < querySnapshot.docs.length; i++) {
+    Map<String, dynamic>? documentdata =
+        querySnapshot.docs[i].data() as Map<String, dynamic>?;
+    double rating = documentdata!['rates'] ?? 0;
+    totalRating += rating;
+    reviewCount++;
+  }
+
+  double averageRating = reviewCount > 0 ? totalRating / reviewCount : 0;
+
+  return averageRating;
+}

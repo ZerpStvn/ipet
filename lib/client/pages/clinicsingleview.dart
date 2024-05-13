@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -19,6 +21,14 @@ class _ClinicViewSingleState extends State<ClinicViewSingle> {
   final TextEditingController comments = TextEditingController();
   bool iscomminting = false;
   double ratereivew = 0;
+
+  Map<String, Map<String, String>> availableTimes = {};
+  DateTime? _selectedDateTime;
+  @override
+  void initState() {
+    super.initState();
+  }
+
   @override
   void dispose() {
     super.dispose();
@@ -185,7 +195,9 @@ class _ClinicViewSingleState extends State<ClinicViewSingle> {
                                   backgroundColor: maincolor,
                                   shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(10))),
-                              onPressed: () {},
+                              onPressed: () {
+                                _selectDateTime(context);
+                              },
                               child: const Text(
                                 "Schedule Appointment",
                                 style: TextStyle(color: Colors.white),
@@ -393,5 +405,26 @@ class _ClinicViewSingleState extends State<ClinicViewSingle> {
                 ),
               ));
         });
+  }
+
+  Future<void> _selectDateTime(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDateTime ?? DateTime.now(),
+      firstDate: DateTime.now(),
+      lastDate: DateTime(2101),
+    );
+    if (picked != null) {
+      final TimeOfDay? pickedTime = await showTimePicker(
+        context: context,
+        initialTime: TimeOfDay.now(),
+      );
+      if (pickedTime != null) {
+        setState(() {
+          _selectedDateTime = DateTime(picked.year, picked.month, picked.day,
+              pickedTime.hour, pickedTime.minute);
+        });
+      }
+    }
   }
 }
