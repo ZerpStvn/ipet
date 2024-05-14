@@ -1,6 +1,7 @@
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:ipet/client/pages/profile.dart';
+import 'package:ipet/client/pages/userappointment.dart';
 import 'package:ipet/client/widgets/clientHomeWidget.dart';
 import 'package:ipet/client/widgets/clientMapWidget.dart';
 import 'package:ipet/misc/themestyle.dart';
@@ -21,6 +22,8 @@ class _HomeClientMainState extends State<HomeClientMain> {
     final provider = Provider.of<AuthProviderClass>(context);
     if (_atpage == 0) {
       return ClientHomeWidget(provider: provider);
+    } else if (_atpage == 1) {
+      return const UserAppointmentcheck();
     } else if (_atpage == 2) {
       return ClientMapWidget(
         provider: provider,

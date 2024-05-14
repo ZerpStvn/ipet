@@ -62,12 +62,20 @@ bool hasClinicsWithinRadius(double userLat, double userLon, double maxRadius,
   return false;
 }
 
-Future<double> calculateRating(String documentID) async {
+List<String> accomodation = [
+  " Extremely accommodating",
+  "Very accommodating",
+  "Moderately accommodating",
+  "Somewhat accommodating",
+  "Not accommodating",
+  "Unaccommodating",
+];
+Future<double> calculateRating(String documentid) async {
   double totalRating = 0;
   int reviewCount = 0;
   CollectionReference ratingsCollection = FirebaseFirestore.instance
       .collection('ratings')
-      .doc(documentID)
+      .doc(documentid)
       .collection('reviews');
 
   QuerySnapshot querySnapshot = await ratingsCollection.get();
@@ -76,6 +84,52 @@ Future<double> calculateRating(String documentID) async {
     Map<String, dynamic>? documentdata =
         querySnapshot.docs[i].data() as Map<String, dynamic>?;
     double rating = documentdata!['rates'] ?? 0;
+    totalRating += rating;
+    reviewCount++;
+  }
+
+  double averageRating = reviewCount > 0 ? totalRating / reviewCount : 0;
+
+  return averageRating;
+}
+
+Future<double> calculateStaffRating(String documentid) async {
+  double totalRating = 0;
+  int reviewCount = 0;
+  CollectionReference ratingsCollection = FirebaseFirestore.instance
+      .collection('ratings')
+      .doc(documentid)
+      .collection('reviews');
+
+  QuerySnapshot querySnapshot = await ratingsCollection.get();
+
+  for (int i = 0; i < querySnapshot.docs.length; i++) {
+    Map<String, dynamic>? documentdata =
+        querySnapshot.docs[i].data() as Map<String, dynamic>?;
+    double rating = documentdata!['staffrate'] ?? 0;
+    totalRating += rating;
+    reviewCount++;
+  }
+
+  double averageRating = reviewCount > 0 ? totalRating / reviewCount : 0;
+
+  return averageRating;
+}
+
+Future<double> calculatePriceRating(String documentid) async {
+  double totalRating = 0;
+  int reviewCount = 0;
+  CollectionReference ratingsCollection = FirebaseFirestore.instance
+      .collection('ratings')
+      .doc(documentid)
+      .collection('reviews');
+
+  QuerySnapshot querySnapshot = await ratingsCollection.get();
+
+  for (int i = 0; i < querySnapshot.docs.length; i++) {
+    Map<String, dynamic>? documentdata =
+        querySnapshot.docs[i].data() as Map<String, dynamic>?;
+    double rating = documentdata!['pricerate'] ?? 0;
     totalRating += rating;
     reviewCount++;
   }

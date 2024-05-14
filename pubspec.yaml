@@ -54,6 +54,7 @@ dependencies:
   dio: ^5.4.3+1
   http: ^1.2.1
   flutter_rating_bar: ^4.0.1
+  dropdown_button2: ^2.3.9
   # location: ^6.0.1
 
 dev_dependencies:

@@ -15,14 +15,14 @@ class Headline extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                "Scheduled Appointments",
+                "Scheduled\nAppointments",
                 style: TextStyle(
                     color: Colors.black,
                     fontSize: 18,
                     fontWeight: FontWeight.normal),
               ),
               Text(
-                "view your scheduled appointment",
+                "view your appointment",
                 style: TextStyle(
                     color: Colors.grey,
                     fontSize: 12,

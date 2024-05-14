@@ -3,7 +3,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:intl/intl.dart';
+import 'package:ipet/client/widgets/ratingsInformation.dart';
+import 'package:ipet/client/widgets/ratingsreview.dart';
+import 'package:ipet/client/widgets/singlevetData.dart';
+import 'package:ipet/misc/function.dart';
 import 'package:ipet/misc/themestyle.dart';
 import 'package:ipet/model/Authprovider.dart';
 import 'package:ipet/utils/firebasehook.dart';
@@ -19,24 +23,31 @@ class ClinicViewSingle extends StatefulWidget {
 
 class _ClinicViewSingleState extends State<ClinicViewSingle> {
   final TextEditingController comments = TextEditingController();
+  final TextEditingController purpose = TextEditingController();
+  List<String> services = [];
   bool iscomminting = false;
   double ratereivew = 0;
-
-  Map<String, Map<String, String>> availableTimes = {};
+  double staffrate = 0;
+  double pricrrate = 0;
   DateTime? _selectedDateTime;
+  String? selectedValue;
+  String? selectedaccomodation;
+  bool isuploading = false;
   @override
   void initState() {
     super.initState();
+    getlistofservices();
   }
 
   @override
   void dispose() {
     super.dispose();
+    purpose.dispose();
     comments.dispose();
   }
 
   Future<void> getratings(
-      String name, String impageprofile, double rates) async {
+      String name, String impageprofile, double rates, String userid) async {
     setState(() {
       iscomminting = true;
     });
@@ -45,11 +56,15 @@ class _ClinicViewSingleState extends State<ClinicViewSingle> {
           .collection('ratings')
           .doc(widget.documentID)
           .collection('reviews')
-          .add({
+          .doc(userid)
+          .set({
         "name": name,
         "date": DateTime.now(),
         "imageprofile": impageprofile,
         "comment": comments.text,
+        "pricerate": pricrrate,
+        "accomodation": selectedaccomodation,
+        "staffrate": staffrate,
         "rates": rates
       }).then((value) {
         setState(() {
@@ -66,28 +81,6 @@ class _ClinicViewSingleState extends State<ClinicViewSingle> {
 
   // "profile": "${userauth.userModel!.imageprofile}",
   // "name": "${userauth.userModel!.fname}",
-  Future<double> calculateRating() async {
-    double totalRating = 0;
-    int reviewCount = 0;
-    CollectionReference ratingsCollection = FirebaseFirestore.instance
-        .collection('ratings')
-        .doc(widget.documentID)
-        .collection('reviews');
-
-    QuerySnapshot querySnapshot = await ratingsCollection.get();
-
-    for (int i = 0; i < querySnapshot.docs.length; i++) {
-      Map<String, dynamic>? documentdata =
-          querySnapshot.docs[i].data() as Map<String, dynamic>?;
-      double rating = documentdata!['rates'] ?? 0;
-      totalRating += rating;
-      reviewCount++;
-    }
-
-    double averageRating = reviewCount > 0 ? totalRating / reviewCount : 0;
-
-    return averageRating;
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -143,198 +136,32 @@ class _ClinicViewSingleState extends State<ClinicViewSingle> {
                     const SizedBox(
                       height: 20,
                     ),
-                    ListTile(
-                      leading: Container(
-                        height: 60,
-                        width: 80,
-                        decoration: BoxDecoration(
-                            color: const Color.fromARGB(80, 158, 158, 158),
-                            borderRadius: BorderRadius.circular(8),
-                            image: DecorationImage(
-                                fit: BoxFit.cover,
-                                image:
-                                    NetworkImage("${data['imageprofile']}"))),
-                      ),
-                      title: MainFont(title: "${data['clinicname']}"),
-                      subtitle: FutureBuilder<double>(
-                        future: calculateRating(),
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return Container();
-                          } else if (snapshot.hasError || !snapshot.hasData) {
-                            return MainFont(
-                              title: "No Reviews",
-                              color: maincolor,
-                            );
-                          } else {
-                            return MainFont(
-                              title: "Reviews ${snapshot.data}",
-                              color: maincolor,
-                            );
-                          }
-                        },
-                      ),
-                      trailing: TextButton(
-                          onPressed: () {
-                            ratingmoddal("${userauth.userModel!.fname}",
-                                "${userauth.userModel!.imageprofile}");
-                          },
-                          child: const Text("Rate")),
+                    RatingsDetails(
+                      data: data,
+                      widget: widget,
+                      viewrate: () {
+                        ratingmoddal(
+                            "${userauth.userModel!.fname}",
+                            "${userauth.userModel!.imageprofile}",
+                            "${userauth.userModel!.vetid}");
+                      },
                     ),
                     const SizedBox(
                       height: 10,
                     ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                  backgroundColor: maincolor,
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10))),
-                              onPressed: () {
-                                _selectDateTime(context);
-                              },
-                              child: const Text(
-                                "Schedule Appointment",
-                                style: TextStyle(color: Colors.white),
-                              )),
-                          const SizedBox(
-                            height: 15,
-                          ),
-                          const Text("Operation Time",
-                              style: TextStyle(
-                                  fontSize: 15, fontWeight: FontWeight.bold)),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          Column(
-                            children: operations.map((e) {
-                              return Text(
-                                  "${e['day']} ${e['startTime']} - ${e['endTime']} ");
-                            }).toList(),
-                          ),
-                          const SizedBox(
-                            height: 30,
-                          ),
-                          const Text("About the Clinic",
-                              style: TextStyle(
-                                  fontSize: 15, fontWeight: FontWeight.bold)),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          Text("${data["description"]}"),
-                          const SizedBox(
-                            height: 25,
-                          ),
-                          const Text("Services",
-                              style: TextStyle(
-                                  fontSize: 15, fontWeight: FontWeight.bold)),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          Wrap(
-                            spacing: 8.0,
-                            runSpacing: 8.0,
-                            children: services.map((e) {
-                              return Chip(
-                                side: BorderSide(width: 0, color: maincolor),
-                                label: Text(e),
-                                backgroundColor: maincolor,
-                                labelStyle:
-                                    const TextStyle(color: Colors.white),
-                              );
-                            }).toList(),
-                          ),
-                          const SizedBox(
-                            height: 25,
-                          ),
-                          const Text("Specialties",
-                              style: TextStyle(
-                                  fontSize: 15, fontWeight: FontWeight.bold)),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          Wrap(
-                            spacing: 8.0,
-                            runSpacing: 8.0,
-                            children: specialties.map((e) {
-                              return Chip(
-                                side: BorderSide(width: 0, color: maincolor),
-                                label: Text(e),
-                                backgroundColor: maincolor,
-                                labelStyle:
-                                    const TextStyle(color: Colors.white),
-                              );
-                            }).toList(),
-                          ),
-                          const SizedBox(
-                            height: 25,
-                          ),
-                          StreamBuilder(
-                              stream: FirebaseFirestore.instance
-                                  .collection('ratings')
-                                  .doc(widget.documentID)
-                                  .collection('reviews')
-                                  .orderBy("date", descending: true)
-                                  .snapshots(),
-                              builder: (context, snapshot) {
-                                if (snapshot.connectionState ==
-                                    ConnectionState.waiting) {
-                                  return Container();
-                                } else if (!snapshot.hasData ||
-                                    snapshot.hasError) {
-                                  return Container();
-                                } else {
-                                  return Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      const MainFont(
-                                        title: "Reviews and comments",
-                                        fsize: 15,
-                                        fweight: FontWeight.normal,
-                                      ),
-                                      ListView.builder(
-                                          padding:
-                                              const EdgeInsets.only(top: 5),
-                                          shrinkWrap: true,
-                                          physics:
-                                              const NeverScrollableScrollPhysics(),
-                                          itemCount: snapshot.data!.docs.length,
-                                          itemBuilder: (context, index) {
-                                            var datafetch = snapshot
-                                                .data!.docs[index]
-                                                .data();
-
-                                            return ListTile(
-                                              leading: CircleAvatar(
-                                                backgroundImage: NetworkImage(
-                                                    "${datafetch["imageprofile"]}"),
-                                              ),
-                                              title: MainFont(
-                                                  title:
-                                                      "${datafetch["name"]}"),
-                                              subtitle: MainFont(
-                                                  title:
-                                                      " ${datafetch['comment']}"),
-                                              trailing: MainFont(
-                                                  title:
-                                                      "${datafetch['rates']}"),
-                                            );
-                                          })
-                                    ],
-                                  );
-                                }
-                              }),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                        ],
-                      ),
+                    SingleVetData(
+                      operations: operations,
+                      data: data,
+                      services: services,
+                      specialties: specialties,
+                      widget: widget,
+                      showmod: () {
+                        _selectDateTime(
+                            context,
+                            userauth,
+                            "${data['imageprofile'] ?? ""}",
+                            "${data['clinicname'] ?? ""}");
+                      },
                     )
                   ],
                 );
@@ -346,85 +173,300 @@ class _ClinicViewSingleState extends State<ClinicViewSingle> {
     );
   }
 
-  void ratingmoddal(String name, String impageprofiles) {
+  void ratingmoddal(String name, String impageprofiles, String userid) {
     showDialog(
         context: context,
         builder: (context) {
-          return AlertDialog(
-              title: const MainFont(
-                title: "Leave us a review",
-                fweight: FontWeight.normal,
-              ),
-              actions: [
-                iscomminting == false
-                    ? TextButton(
-                        onPressed: () {
-                          iscomminting == false
-                              ? getratings(name, impageprofiles, ratereivew)
-                                  .then((value) => Navigator.pop(context))
-                              : null;
-                        },
-                        child: const MainFont(title: "Submit"))
-                    : CircularProgressIndicator(
-                        color: maincolor,
-                      ),
-              ],
-              content: SizedBox(
-                height: 190,
-                child: Column(
-                  children: [
-                    RatingBar.builder(
-                      initialRating: 0,
-                      minRating: 1,
-                      direction: Axis.horizontal,
-                      allowHalfRating: true,
-                      itemCount: 5,
-                      itemPadding: const EdgeInsets.symmetric(horizontal: 4.0),
-                      itemBuilder: (context, _) => Icon(
-                        Icons.star,
-                        color: maincolor,
-                      ),
-                      onRatingUpdate: (rating) {
-                        setState(() {
-                          ratereivew = rating;
-                          debugPrint("$ratereivew");
-                        });
-                      },
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    TextFormField(
-                      controller: comments,
-                      maxLength: 340,
-                      maxLengthEnforcement: MaxLengthEnforcement.enforced,
-                      decoration: const InputDecoration(
-                          hintText: "Comments", border: OutlineInputBorder()),
-                    )
-                  ],
+          return SingleChildScrollView(
+            child: AlertDialog(
+                title: const MainFont(
+                  title: "Give us Feedback",
+                  fweight: FontWeight.normal,
                 ),
-              ));
+                actions: [
+                  iscomminting == false
+                      ? TextButton(
+                          onPressed: () {
+                            iscomminting == false
+                                ? getratings(name, impageprofiles, ratereivew,
+                                        userid)
+                                    .then((value) => Navigator.pop(context))
+                                : null;
+                          },
+                          child: const MainFont(title: "Submit"))
+                      : CircularProgressIndicator(
+                          color: maincolor,
+                        ),
+                ],
+                content: SizedBox(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Ratingsreview(
+                        ratings: (rating) {
+                          setState(() {
+                            ratereivew = rating;
+                            debugPrint("$rating");
+                          });
+                        },
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      TextFormField(
+                        controller: comments,
+                        maxLength: 340,
+                        maxLengthEnforcement: MaxLengthEnforcement.enforced,
+                        decoration: const InputDecoration(
+                            hintText: "Comments", border: OutlineInputBorder()),
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      const MainFont(title: "Rate our Staff"),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      Ratingsreview(ratings: (ratings) {
+                        setState(() {
+                          staffrate = ratings;
+                          debugPrint("staff= $staffrate");
+                        });
+                      }),
+                      const SizedBox(
+                        height: 20,
+                      ),
+                      const MainFont(title: "Accomodation"),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width,
+                        child: DropdownButtonFormField<String>(
+                          style: const TextStyle(
+                              fontSize: 12, color: Colors.black),
+                          decoration: InputDecoration(
+                              border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10))),
+                          hint: const Text('Accomodotion Feedback'),
+                          value: selectedaccomodation,
+                          items: accomodation
+                              .map((e) => DropdownMenuItem(
+                                  value: e, child: MainFont(title: e)))
+                              .toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              selectedaccomodation = value;
+                              debugPrint("$selectedaccomodation");
+                            });
+                          },
+                          validator: (value) =>
+                              value == null ? 'Rate our accomodation' : null,
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 20,
+                      ),
+                      const MainFont(title: "Price "),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      Ratingsreview(ratings: (ratings) {
+                        setState(() {
+                          pricrrate = ratings;
+                          debugPrint("$ratings");
+                        });
+                      }),
+                    ],
+                  ),
+                )),
+          );
         });
   }
 
-  Future<void> _selectDateTime(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: _selectedDateTime ?? DateTime.now(),
-      firstDate: DateTime.now(),
-      lastDate: DateTime(2101),
-    );
-    if (picked != null) {
-      final TimeOfDay? pickedTime = await showTimePicker(
+  Future<void> _selectDateTime(
+    BuildContext context,
+    AuthProviderClass auth,
+    String clinicprofile,
+    String name,
+  ) async {
+    try {
+      final DateTime? pickedDate = await showDatePicker(
         context: context,
-        initialTime: TimeOfDay.now(),
+        initialDate: _selectedDateTime ?? DateTime.now(),
+        firstDate: DateTime.now(),
+        lastDate: DateTime(2101),
       );
-      if (pickedTime != null) {
-        setState(() {
-          _selectedDateTime = DateTime(picked.year, picked.month, picked.day,
-              pickedTime.hour, pickedTime.minute);
+
+      if (pickedDate != null) {
+        final TimeOfDay? pickedTime = await showTimePicker(
+          context: context,
+          initialTime: TimeOfDay.now(),
+        );
+
+        if (pickedTime != null) {
+          setState(() {
+            isuploading = true;
+          });
+
+          _selectedDateTime = DateTime(
+            pickedDate.year,
+            pickedDate.month,
+            pickedDate.day,
+            pickedTime.hour,
+            pickedTime.minute,
+          );
+          showModalService(auth, clinicprofile, name);
+
+          setState(() {
+            isuploading = false;
+          });
+        }
+      }
+    } catch (error) {
+      debugPrint("Error selecting date and time: $error");
+      setState(() {
+        isuploading = false;
+      });
+    }
+  }
+
+  Future<void> getlistofservices() async {
+    try {
+      DocumentSnapshot listofservice = await usercred
+          .doc(widget.documentID)
+          .collection("vertirenary")
+          .doc(widget.documentID)
+          .get();
+
+      if (listofservice.exists) {
+        Map<String, dynamic>? fetchdata =
+            listofservice.data() as Map<String, dynamic>?;
+
+        if (fetchdata != null && fetchdata.containsKey('services')) {
+          List<dynamic> fetchedServices = fetchdata['services'];
+
+          setState(() {
+            services = List<String>.from(fetchedServices);
+          });
+
+          debugPrint("service = $services");
+        }
+      }
+    } catch (e) {
+      debugPrint("Error fetching services: $e");
+    }
+  }
+
+  final _formKey = GlobalKey<FormState>();
+  String get formattedDate {
+    if (_selectedDateTime == null) {
+      return 'No date selected';
+    } else {
+      return DateFormat('MMMM dd, yyyy').format(_selectedDateTime!);
+    }
+  }
+
+  void showModalService(
+      AuthProviderClass auth, String clinicprofile, String name) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Purpose of your appointment"),
+          content: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text("You scheduled: $formattedDate"),
+                const SizedBox(height: 10),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width,
+                  child: DropdownButtonFormField<String>(
+                    decoration: InputDecoration(
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10))),
+                    hint: const Text('Service'),
+                    value: selectedValue,
+                    items: services
+                        .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                        .toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        selectedValue = value;
+                      });
+                    },
+                    validator: (value) =>
+                        value == null ? 'Please select a service' : null,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                TextFormField(
+                  controller: purpose,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    labelText: 'Purpose',
+                  ),
+                  validator: (value) => value == null || value.isEmpty
+                      ? 'Please enter a purpose'
+                      : null,
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                if (_formKey.currentState!.validate()) {
+                  updloadlisofapoinments(auth, clinicprofile, name)
+                      .then((value) {
+                    if (mounted) {
+                      Navigator.of(context).pop();
+                    }
+                  });
+                }
+              },
+              child: const Text('Submit'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> updloadlisofapoinments(
+      AuthProviderClass auth, String clinicprofile, String name) async {
+    try {
+      if (_formKey.currentState!.validate()) {
+        await FirebaseFirestore.instance.collection('appointment').add({
+          'appoinmentdate': _selectedDateTime,
+          'name': "${auth.userModel!.fname} ${auth.userModel!.lname} ",
+          'profile': auth.userModel!.imageprofile,
+          'userid': auth.userModel!.vetid,
+          'vetprofile': clinicprofile,
+          'clinic': name,
+          'clinicid': widget.documentID,
+          'status': 0,
+        });
+        await FirebaseFirestore.instance
+            .collection('userappointment')
+            .doc(auth.userModel!.vetid)
+            .set({
+          'appoinmentdate': _selectedDateTime,
+          'name': "${auth.userModel!.fname} ${auth.userModel!.lname} ",
+          'profile': auth.userModel!.imageprofile,
+          'userid': auth.userModel!.vetid,
+          'vetprofile': clinicprofile,
+          'clinic': name,
+          'clinicid': widget.documentID,
+          'status': 0,
         });
       }
+    } catch (error) {
+      debugPrint("$error");
     }
   }
 }

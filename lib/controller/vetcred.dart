@@ -100,153 +100,146 @@ class _VetCredsState extends State<VetCreds> {
 
   @override
   Widget build(BuildContext context) {
-    return PopScope(
-      onPopInvoked: (bool didpop) async {
-        if (didpop) return;
-        await deleteuser();
-      },
-      child: Scaffold(
-        appBar: AppBar(
-          automaticallyImplyLeading: true,
-          backgroundColor: Colors.white,
-          surfaceTintColor: Colors.white,
-        ),
-        body: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(18.0),
-            child: Form(
-              key: _formkey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "About Your Clinic",
-                    style: TextStyle(
-                        fontSize: 25,
-                        color: maincolor,
-                        fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(
-                    height: 15,
-                  ),
-                  Container(
-                    height: 5,
-                    width: 70,
-                    decoration: BoxDecoration(
-                        color: maincolor,
-                        borderRadius: BorderRadius.circular(9)),
-                  ),
-                  const SizedBox(
-                    height: 25,
-                  ),
-                  const Text("Date The Clinic Established"),
-                  const SizedBox(
-                    height: 5,
-                  ),
-                  TextFormField(
-                    validator: (val) {
-                      if (val!.isEmpty) {
-                        return "Provide Date The Clinic Established";
-                      } else {
-                        return null;
-                      }
-                    },
-                    onTap: () {
-                      _selectdate();
-                    },
-                    readOnly: true,
-                    controller: dateEstablished,
-                    keyboardType: TextInputType.text,
-                    textInputAction: TextInputAction.next,
-                    decoration: const InputDecoration(
-                        prefixIcon: Icon(Icons.calendar_month_outlined),
-                        hintText: "Clinic Establish (mm-dd-yyyy)",
-                        border: OutlineInputBorder()),
-                  ),
-                  const SizedBox(
-                    height: 15,
-                  ),
-                  const Text("Clinic Operation Hour (M-T-W-TH-F-S-SU)"),
-                  const SizedBox(
-                    height: 5,
-                  ),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 55,
-                    child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                            backgroundColor: maincolor,
-                            shape: const RoundedRectangleBorder(
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(5)))),
-                        onPressed: _selectDateTime,
-                        child: const MainFont(
-                          title: 'Add Clinic Operation Hour',
-                          color: Colors.white,
-                        )),
-                  ),
-                  ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: clinicSchedule.length,
-                    itemBuilder: (context, index) {
-                      return ListTile(
-                        title: Text(
-                          '${clinicSchedule[index]['day']}: ${clinicSchedule[index]['startTime']} - ${clinicSchedule[index]['endTime']}',
+    return Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.white,
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(18.0),
+          child: Form(
+            key: _formkey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "About Your Clinic",
+                  style: TextStyle(
+                      fontSize: 25,
+                      color: maincolor,
+                      fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(
+                  height: 15,
+                ),
+                Container(
+                  height: 5,
+                  width: 70,
+                  decoration: BoxDecoration(
+                      color: maincolor, borderRadius: BorderRadius.circular(9)),
+                ),
+                const SizedBox(
+                  height: 25,
+                ),
+                const Text("Date The Clinic Established"),
+                const SizedBox(
+                  height: 5,
+                ),
+                TextFormField(
+                  validator: (val) {
+                    if (val!.isEmpty) {
+                      return "Provide Date The Clinic Established";
+                    } else {
+                      return null;
+                    }
+                  },
+                  onTap: () {
+                    _selectdate();
+                  },
+                  readOnly: true,
+                  controller: dateEstablished,
+                  keyboardType: TextInputType.text,
+                  textInputAction: TextInputAction.next,
+                  decoration: const InputDecoration(
+                      prefixIcon: Icon(Icons.calendar_month_outlined),
+                      hintText: "Clinic Establish (mm-dd-yyyy)",
+                      border: OutlineInputBorder()),
+                ),
+                const SizedBox(
+                  height: 15,
+                ),
+                const Text("Clinic Operation Hour (M-T-W-TH-F-S-SU)"),
+                const SizedBox(
+                  height: 5,
+                ),
+                SizedBox(
+                  width: double.infinity,
+                  height: 55,
+                  child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: maincolor,
+                          shape: const RoundedRectangleBorder(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(5)))),
+                      onPressed: _selectDateTime,
+                      child: const MainFont(
+                        title: 'Add Clinic Operation Hour',
+                        color: Colors.white,
+                      )),
+                ),
+                ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: clinicSchedule.length,
+                  itemBuilder: (context, index) {
+                    return ListTile(
+                      title: Text(
+                        '${clinicSchedule[index]['day']}: ${clinicSchedule[index]['startTime']} - ${clinicSchedule[index]['endTime']}',
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(
+                  height: 18,
+                ),
+                const SizedBox(
+                  height: 5,
+                ),
+                Textformtype(
+                    fieldname: "Clinic Description",
+                    textEditingController: description,
+                    uppertitle: "Tell Us About your Clinic",
+                    textvalidator: "Provide Short Description"),
+                const SizedBox(
+                  height: 25,
+                ),
+                const Text("Service Offer"),
+                ClinicFieldTags(
+                    stringController: stringController,
+                    distanceToField: _distanceToField,
+                    hintext: 'Service Offered',
+                    servicetags: servicetags),
+                const Text(
+                    "E.g: wellness-exams, vaccinations, surgeries, etc."),
+                const SizedBox(
+                  height: 19,
+                ),
+                const Text("specialties"),
+                const SizedBox(
+                  height: 5,
+                ),
+                ClinicFieldTags(
+                    stringController: specialties,
+                    distanceToField: _distanceSpecialties,
+                    hintext: 'specialties',
+                    servicetags: specialtiesList),
+                const Text("E.g: orthopedic, dermatology, exotic-pets, etc."),
+                const SizedBox(
+                  height: 25,
+                ),
+                isupload == false
+                    ? GlobalButton(
+                        callback: () {
+                          handlecredclinic();
+                        },
+                        title: "Continue")
+                    : Center(
+                        child: CircularProgressIndicator(
+                          color: maincolor,
                         ),
-                      );
-                    },
-                  ),
-                  const SizedBox(
-                    height: 18,
-                  ),
-                  const SizedBox(
-                    height: 5,
-                  ),
-                  Textformtype(
-                      fieldname: "Clinic Description",
-                      textEditingController: description,
-                      uppertitle: "Tell Us About your Clinic",
-                      textvalidator: "Provide Short Description"),
-                  const SizedBox(
-                    height: 25,
-                  ),
-                  const Text("Service Offer"),
-                  ClinicFieldTags(
-                      stringController: stringController,
-                      distanceToField: _distanceToField,
-                      hintext: 'Service Offered',
-                      servicetags: servicetags),
-                  const Text(
-                      "E.g: wellness-exams, vaccinations, surgeries, etc."),
-                  const SizedBox(
-                    height: 19,
-                  ),
-                  const Text("specialties"),
-                  const SizedBox(
-                    height: 5,
-                  ),
-                  ClinicFieldTags(
-                      stringController: specialties,
-                      distanceToField: _distanceSpecialties,
-                      hintext: 'specialties',
-                      servicetags: specialtiesList),
-                  const Text("E.g: orthopedic, dermatology, exotic-pets, etc."),
-                  const SizedBox(
-                    height: 25,
-                  ),
-                  isupload == false
-                      ? GlobalButton(
-                          callback: () {
-                            handlecredclinic();
-                          },
-                          title: "Continue")
-                      : Center(
-                          child: CircularProgressIndicator(
-                            color: maincolor,
-                          ),
-                        )
-                ],
-              ),
+                      )
+              ],
             ),
           ),
         ),
@@ -306,6 +299,7 @@ class _VetCredsState extends State<VetCreds> {
 
   Future<void> deleteuser() async {
     try {
+      await userAuth.currentUser!.delete();
       await usercred.doc(widget.documentID).delete();
     } catch (e) {
       debugPrint("error deleting user");

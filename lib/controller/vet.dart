@@ -132,10 +132,30 @@ class _VetControllerState extends State<VetController> {
         });
       }
     } on FirebaseException catch (e) {
-      if (mounted) {
-        snackbar(context, "$e");
-      }
       setState(() {
+        switch (e.code) {
+          case "invalid-email":
+            snackbar(context, "Your email address is invalid.");
+            break;
+          case "wrong-password":
+            snackbar(context, "Your password is wrong.");
+            break;
+          case "user-not-found":
+            snackbar(context, "User with this email doesn't exist.");
+            break;
+          case "user-disabled":
+            snackbar(context, "User with this email has been disabled.");
+            break;
+          case "too-many-requests":
+            snackbar(context, "Too many requests");
+            break;
+          case "operation-not-allowed":
+            snackbar(
+                context, "Signing in with Email and Password is not enabled.");
+            break;
+          default:
+            snackbar(context, "Check your email, password and try again");
+        }
         isuploading = false;
       });
     }
@@ -151,7 +171,7 @@ class _VetControllerState extends State<VetController> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "Register Your Clinic with Us",
+              "Register Your Clinic\nwith Us",
               style: TextStyle(
                   fontSize: 25, color: maincolor, fontWeight: FontWeight.bold),
             ),

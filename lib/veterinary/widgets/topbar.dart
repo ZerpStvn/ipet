@@ -43,30 +43,38 @@ class _TopBarState extends State<TopBar> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            "Welcome and\nHave a great day",
-            style: TextStyle(
-                color: Colors.black, fontSize: 30, fontWeight: FontWeight.bold),
+          const Expanded(
+            flex: 4,
+            child: Text(
+              "Welcome and\nHave a great day",
+              style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 30,
+                  fontWeight: FontWeight.bold),
+            ),
           ),
-          Container(
-            decoration: BoxDecoration(boxShadow: [
-              BoxShadow(
-                  offset: const Offset(12, 26),
-                  blurRadius: 50,
-                  spreadRadius: 0,
-                  color: Colors.grey.withOpacity(.25)),
-            ]),
-            child: GestureDetector(
-              onTap: () {
-                islogout == false ? logout() : null;
-              },
-              child: CircleAvatar(
-                radius: 25,
-                backgroundColor: Colors.white,
-                child: Icon(
-                  Icons.logout_outlined,
-                  size: 25,
-                  color: maincolor,
+          Expanded(
+            flex: 1,
+            child: Container(
+              decoration: BoxDecoration(boxShadow: [
+                BoxShadow(
+                    offset: const Offset(12, 26),
+                    blurRadius: 50,
+                    spreadRadius: 0,
+                    color: Colors.grey.withOpacity(.25)),
+              ]),
+              child: GestureDetector(
+                onTap: () {
+                  islogout == false ? logout() : null;
+                },
+                child: CircleAvatar(
+                  radius: 25,
+                  backgroundColor: Colors.white,
+                  child: Icon(
+                    Icons.logout_outlined,
+                    size: 25,
+                    color: maincolor,
+                  ),
                 ),
               ),
             ),
