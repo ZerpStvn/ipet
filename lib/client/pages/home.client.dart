@@ -1,5 +1,6 @@
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:ipet/client/pages/notification.dart';
 import 'package:ipet/client/pages/profile.dart';
 import 'package:ipet/client/pages/userappointment.dart';
 import 'package:ipet/client/widgets/clientHomeWidget.dart';
@@ -28,6 +29,8 @@ class _HomeClientMainState extends State<HomeClientMain> {
       return ClientMapWidget(
         provider: provider,
       );
+    } else if (_atpage == 3) {
+      return const Notifications();
     } else if (_atpage == 4) {
       return const ClientProfile();
     }

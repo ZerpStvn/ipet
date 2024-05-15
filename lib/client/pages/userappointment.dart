@@ -62,7 +62,6 @@ class _UserAppointmentcheckState extends State<UserAppointmentcheck> {
 
   @override
   Widget build(BuildContext context) {
-    ;
     return Padding(
       padding: const EdgeInsets.all(11.0),
       child: Column(
@@ -73,38 +72,48 @@ class _UserAppointmentcheckState extends State<UserAppointmentcheck> {
           const RecentAppointment(
             istitle: true,
           ),
-          DataTable(
-            columns: const [
-              DataColumn(
-                  label: MainFont(
-                title: "Appoint..",
-              )),
-              DataColumn(
-                  label: MainFont(
-                title: "Date",
-              )),
-              DataColumn(
-                  label: MainFont(
-                title: "status",
-              )),
-            ],
-            rows: data.map((item) {
-              Timestamp timestamp = item['appoinmentdate'];
-              DateTime dateTime = timestamp.toDate();
-              String formattedDate = DateFormat('EEE, M/d/y').format(dateTime);
-              return DataRow(cells: [
-                DataCell(MainFont(
-                    title: truncateWithEllipsis(7, "${item['clinic']}"))),
-                DataCell(MainFont(title: formattedDate)),
-                DataCell(MainFont(
-                    title: item['status'] == 0
-                        ? "active"
-                        : item['status'] == 1
-                            ? "cancel"
-                            : "Done"))
-              ]);
-            }).toList(),
-          )
+          data.isNotEmpty
+              ? DataTable(
+                  columns: const [
+                    DataColumn(
+                        label: MainFont(
+                      title: "Appoint..",
+                    )),
+                    DataColumn(
+                        label: MainFont(
+                      title: "Date",
+                    )),
+                    DataColumn(
+                        label: MainFont(
+                      title: "status",
+                    )),
+                  ],
+                  rows: data.map((item) {
+                    Timestamp timestamp = item['appoinmentdate'];
+                    DateTime dateTime = timestamp.toDate();
+                    String formattedDate =
+                        DateFormat('EEE, M/d/y').format(dateTime);
+                    return DataRow(cells: [
+                      DataCell(MainFont(
+                          title: truncateWithEllipsis(7, "${item['clinic']}"))),
+                      DataCell(MainFont(title: formattedDate)),
+                      DataCell(MainFont(
+                          title: item['status'] == 0
+                              ? "active"
+                              : item['status'] == 1
+                                  ? "cancel"
+                                  : "Done"))
+                    ]);
+                  }).toList(),
+                )
+              : const SizedBox(
+                  height: 250,
+                  child: Center(
+                    child: MainFont(
+                      title: "You Dont Have Appointment",
+                    ),
+                  ),
+                )
         ],
       ),
     );

@@ -96,7 +96,7 @@ class _RecentAppointmentState extends State<RecentAppointment> {
           } else if (snapshot.hasError || !snapshot.hasData) {
             debugPrint("error = ${snapshot.error}");
             return const MainFont(title: "No Appointment For Now ");
-          } else if (snapshot.hasData) {
+          } else if (snapshot.data!.docs.isNotEmpty) {
             return SizedBox(
               width: MediaQuery.of(context).size.width,
               height: widget.istitle == false ? 260 : 290,
