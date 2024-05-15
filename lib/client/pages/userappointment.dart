@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:ipet/client/widgets/recentappointment.dart';
+import 'package:ipet/misc/function.dart';
 import 'package:ipet/misc/themestyle.dart';
 import 'package:ipet/model/Authprovider.dart';
 import 'package:provider/provider.dart';
@@ -34,24 +35,34 @@ class _UserAppointmentcheckState extends State<UserAppointmentcheck> {
   List<Map<String, dynamic>> data = [];
 
   @override
-  void initState() {
-    super.initState();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
     fetchData();
   }
 
   Future<void> fetchData() async {
-    final snapshot =
-        await FirebaseFirestore.instance.collection('userappointment').get();
-    final List<Map<String, dynamic>> fetchedData =
-        snapshot.docs.map((doc) => doc.data()).toList();
-    setState(() {
-      data = fetchedData;
-    });
+    try {
+      if (mounted) {
+        final provider = Provider.of<AuthProviderClass>(context);
+        final snapshot = await FirebaseFirestore.instance
+            .collection('userappointment')
+            .doc("${provider.userModel!.vetid}")
+            .collection('user')
+            .get();
+        final List<Map<String, dynamic>> fetchedData =
+            snapshot.docs.map((doc) => doc.data()).toList();
+        setState(() {
+          data = fetchedData;
+        });
+      }
+    } catch (error) {
+      debugPrint("$error");
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final provider = Provider.of<AuthProviderClass>(context);
+    ;
     return Padding(
       padding: const EdgeInsets.all(11.0),
       child: Column(
@@ -62,33 +73,11 @@ class _UserAppointmentcheckState extends State<UserAppointmentcheck> {
           const RecentAppointment(
             istitle: true,
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: callback.map((e) {
-              return Expanded(
-                child: SizedBox(
-                  child: Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(e['icon']),
-                          Text(e['title']),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              );
-            }).toList(),
-          ),
-          const SizedBox(height: 20),
           DataTable(
             columns: const [
               DataColumn(
                   label: MainFont(
-                title: "Appointments",
+                title: "Appoint..",
               )),
               DataColumn(
                   label: MainFont(
@@ -104,10 +93,15 @@ class _UserAppointmentcheckState extends State<UserAppointmentcheck> {
               DateTime dateTime = timestamp.toDate();
               String formattedDate = DateFormat('EEE, M/d/y').format(dateTime);
               return DataRow(cells: [
-                DataCell(MainFont(title: "${item['clinic']}")),
+                DataCell(MainFont(
+                    title: truncateWithEllipsis(7, "${item['clinic']}"))),
                 DataCell(MainFont(title: formattedDate)),
-                DataCell(
-                    MainFont(title: item['status'] == 0 ? "active" : "cancel"))
+                DataCell(MainFont(
+                    title: item['status'] == 0
+                        ? "active"
+                        : item['status'] == 1
+                            ? "cancel"
+                            : "Done"))
               ]);
             }).toList(),
           )

@@ -138,3 +138,9 @@ Future<double> calculatePriceRating(String documentid) async {
 
   return averageRating;
 }
+
+String truncateWithEllipsis(int cutoff, String myString) {
+  return (myString.length <= cutoff)
+      ? myString
+      : '${myString.substring(0, cutoff)}...';
+}

@@ -441,7 +441,11 @@ class _ClinicViewSingleState extends State<ClinicViewSingle> {
       AuthProviderClass auth, String clinicprofile, String name) async {
     try {
       if (_formKey.currentState!.validate()) {
-        await FirebaseFirestore.instance.collection('appointment').add({
+        await FirebaseFirestore.instance
+            .collection('appointment')
+            .doc(widget.documentID)
+            .collection('vet')
+            .add({
           'appoinmentdate': _selectedDateTime,
           'name': "${auth.userModel!.fname} ${auth.userModel!.lname} ",
           'profile': auth.userModel!.imageprofile,
@@ -454,7 +458,8 @@ class _ClinicViewSingleState extends State<ClinicViewSingle> {
         await FirebaseFirestore.instance
             .collection('userappointment')
             .doc(auth.userModel!.vetid)
-            .set({
+            .collection('user')
+            .add({
           'appoinmentdate': _selectedDateTime,
           'name': "${auth.userModel!.fname} ${auth.userModel!.lname} ",
           'profile': auth.userModel!.imageprofile,
@@ -464,6 +469,7 @@ class _ClinicViewSingleState extends State<ClinicViewSingle> {
           'clinicid': widget.documentID,
           'status': 0,
         });
+        setState(() {});
       }
     } catch (error) {
       debugPrint("$error");
