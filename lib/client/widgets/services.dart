@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ipet/client/pages/service/serviceswidget.dart';
 import 'package:ipet/misc/function.dart';
 import 'package:ipet/misc/themestyle.dart';
 
@@ -27,24 +28,33 @@ class ServicesOffered extends StatelessWidget {
             itemCount:
                 services.length, // What is services? You need to define it.
             itemBuilder: (context, index) {
-              return Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Container(
-                      width: 110,
-                      height: 110,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        image: DecorationImage(
-                            image: AssetImage("${services[index]["image"]}")),
-                        color: const Color.fromARGB(68, 151, 151, 151),
+              return GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => ServicesCategory(
+                              servicecat: "${services[index]["con"]}")));
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 10.0, vertical: 10),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: 110,
+                        height: 110,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          image: DecorationImage(
+                              image: AssetImage("${services[index]["image"]}")),
+                          color: const Color.fromARGB(68, 151, 151, 151),
+                        ),
                       ),
-                    ),
-                    MainFont(title: "${services[index]["name"]}")
-                  ],
+                      MainFont(title: "${services[index]["name"]}")
+                    ],
+                  ),
                 ),
               );
             },

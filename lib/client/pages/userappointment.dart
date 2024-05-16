@@ -1,11 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
-import 'package:ipet/client/widgets/recentappointment.dart';
+import 'package:ipet/client/widgets/eventview.dart';
 import 'package:ipet/misc/function.dart';
 import 'package:ipet/misc/themestyle.dart';
 import 'package:ipet/model/Authprovider.dart';
+import 'package:ipet/model/events.dart';
 import 'package:provider/provider.dart';
+import 'package:table_calendar/table_calendar.dart';
 
 class UserAppointmentcheck extends StatefulWidget {
   const UserAppointmentcheck({super.key});
@@ -15,107 +19,197 @@ class UserAppointmentcheck extends StatefulWidget {
 }
 
 class _UserAppointmentcheckState extends State<UserAppointmentcheck> {
-  List<Map<String, dynamic>> callback = [
-    {
-      "icon": Icons.delete_outlined,
-      "title": "Delete",
-      "function": "del",
-    },
-    {
-      "icon": Icons.cancel_outlined,
-      "title": "Cancel",
-      "function": "cancel",
-    },
-    {
-      "icon": Icons.done_outlined,
-      "title": "Done",
-      "function": "dn",
-    }
-  ];
-  List<Map<String, dynamic>> data = [];
+  CalendarFormat _calendarFormat = CalendarFormat.month;
+  DateTime _focusedDay = DateTime.now();
+  DateTime? _selectedDay;
+  Map<DateTime, List<AppointEvent>> events = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedDay = _focusedDay;
+    fetchData();
+  }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    fetchData();
   }
 
   Future<void> fetchData() async {
     try {
-      if (mounted) {
-        final provider = Provider.of<AuthProviderClass>(context);
-        final snapshot = await FirebaseFirestore.instance
-            .collection('userappointment')
-            .doc("${provider.userModel!.vetid}")
-            .collection('user')
-            .get();
-        final List<Map<String, dynamic>> fetchedData =
-            snapshot.docs.map((doc) => doc.data()).toList();
-        setState(() {
-          data = fetchedData;
-        });
+      final provider = Provider.of<AuthProviderClass>(context, listen: false);
+      final snapshot = await FirebaseFirestore.instance
+          .collection('userappointment')
+          .doc(provider.userModel!.vetid)
+          .collection('user')
+          .get();
+
+      final List<Map<String, dynamic>> fetchedData =
+          snapshot.docs.map((doc) => doc.data()).toList();
+
+      Map<DateTime, List<AppointEvent>> newEvents = {};
+      for (var doc in snapshot.docs) {
+        var data = doc.data();
+        data['id'] = doc.id; // Add the document ID to the map
+
+        Timestamp timestamp = data['appoinmentdate'];
+        DateTime dateTime = timestamp.toDate();
+        DateTime dateOnly =
+            DateTime(dateTime.year, dateTime.month, dateTime.day);
+
+        String formattedDate = DateFormat('EEE, M/d/y').format(dateOnly);
+        if (newEvents[dateOnly] == null) {
+          newEvents[dateOnly] = [];
+        }
+
+        newEvents[dateOnly]!.add(AppointEvent(
+            name: data['clinic'],
+            status: data['status'],
+            date: formattedDate,
+            vetid: doc.id));
       }
+
+      setState(() {
+        events = newEvents;
+      });
+
+      debugPrint('Events: $events');
     } catch (error) {
-      debugPrint("$error");
+      debugPrint("Error fetching data: $error");
+    }
+  }
+
+  void _onDaySelected(DateTime selectedDay, DateTime focusedDay) {
+    if (!isSameDay(_selectedDay, selectedDay)) {
+      setState(() {
+        _selectedDay = selectedDay;
+        _focusedDay = focusedDay;
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(11.0),
+      padding: const EdgeInsets.all(0.0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 50),
-          const RecentAppointment(
-            istitle: true,
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TableCalendar(
+              firstDay: DateTime.utc(2010, 10, 16),
+              lastDay: DateTime.utc(2030, 3, 14),
+              focusedDay: _focusedDay,
+              selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+              calendarFormat: _calendarFormat,
+              startingDayOfWeek: StartingDayOfWeek.monday,
+              onDaySelected: _onDaySelected,
+              eventLoader: (day) {
+                DateTime dateOnly = DateTime(day.year, day.month, day.day);
+                debugPrint("event date ${events[dateOnly] ?? []}");
+                return events[dateOnly] ?? [];
+              },
+              calendarStyle: const CalendarStyle(
+                outsideDaysVisible: false,
+              ),
+              onFormatChanged: (format) {
+                if (_calendarFormat != format) {
+                  setState(() {
+                    _calendarFormat = format;
+                  });
+                }
+              },
+            ),
           ),
-          data.isNotEmpty
-              ? DataTable(
-                  columns: const [
-                    DataColumn(
-                        label: MainFont(
-                      title: "Appoint..",
-                    )),
-                    DataColumn(
-                        label: MainFont(
-                      title: "Date",
-                    )),
-                    DataColumn(
-                        label: MainFont(
-                      title: "status",
-                    )),
-                  ],
-                  rows: data.map((item) {
-                    Timestamp timestamp = item['appoinmentdate'];
-                    DateTime dateTime = timestamp.toDate();
-                    String formattedDate =
-                        DateFormat('EEE, M/d/y').format(dateTime);
-                    return DataRow(cells: [
-                      DataCell(MainFont(
-                          title: truncateWithEllipsis(7, "${item['clinic']}"))),
-                      DataCell(MainFont(title: formattedDate)),
-                      DataCell(MainFont(
-                          title: item['status'] == 0
-                              ? "active"
-                              : item['status'] == 1
-                                  ? "cancel"
-                                  : "Done"))
-                    ]);
-                  }).toList(),
-                )
-              : const SizedBox(
-                  height: 250,
-                  child: Center(
-                    child: MainFont(
-                      title: "You Dont Have Appointment",
+          if (_selectedDay != null &&
+              events[DateTime(_selectedDay!.year, _selectedDay!.month,
+                      _selectedDay!.day)] !=
+                  null)
+            DataTable(
+              columns: const [
+                DataColumn(label: MainFont(title: "Appoi...")),
+                DataColumn(label: MainFont(title: "Status")),
+                DataColumn(label: MainFont(title: "Action")),
+              ],
+              rows: events[DateTime(_selectedDay!.year, _selectedDay!.month,
+                      _selectedDay!.day)]!
+                  .map((event) {
+                return DataRow(cells: [
+                  DataCell(
+                      MainFont(title: truncateWithEllipsis(7, event.vetid))),
+                  DataCell(Container(
+                    padding: const EdgeInsets.all(7),
+                    decoration: BoxDecoration(
+                      color: renderColor(event.status),
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                  ),
-                )
+                    child: MainFont(
+                      color: Colors.white,
+                      title: event.status == 0
+                          ? "Active"
+                          : event.status == 1
+                              ? "Cancelled"
+                              : "Done",
+                    ),
+                  )),
+                  DataCell(GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => EventViewFormat(
+                                  istitle: false, vetid: event.vetid)));
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(7),
+                      decoration: BoxDecoration(
+                        color: maincolor,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child:
+                          const MainFont(color: Colors.white, title: "View.."),
+                    ),
+                  )),
+                ]);
+              }).toList(),
+            )
+          else
+            const SizedBox(
+              height: 250,
+              child: Center(
+                child: MainFont(title: "You Don't Have Any Appointments"),
+              ),
+            ),
         ],
       ),
     );
   }
+
+  Color renderColor(int status) {
+    switch (status) {
+      case 0:
+        return maincolor;
+      case 1:
+        return Colors.redAccent;
+      default:
+        return maincolor;
+    }
+  }
+}
+
+class AppointEvent {
+  String name;
+  int status;
+  String date;
+  String vetid;
+
+  AppointEvent(
+      {required this.vetid,
+      required this.name,
+      required this.status,
+      required this.date});
 }

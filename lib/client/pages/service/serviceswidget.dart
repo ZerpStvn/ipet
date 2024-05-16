@@ -6,53 +6,39 @@ import 'package:ipet/misc/themestyle.dart';
 import 'package:ipet/model/Authprovider.dart';
 import 'package:provider/provider.dart';
 
-class ListofVeterinary extends StatefulWidget {
-  const ListofVeterinary({super.key});
+class ServicesCategory extends StatelessWidget {
+  final String servicecat;
+  const ServicesCategory({super.key, required this.servicecat});
 
-  @override
-  State<ListofVeterinary> createState() => _ListofVeterinaryState();
-}
-
-class _ListofVeterinaryState extends State<ListofVeterinary> {
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<AuthProviderClass>(context);
     return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        title: const MainFont(
-          title: "Pet Services",
-        ),
-      ),
+      appBar: AppBar(),
       body: SingleChildScrollView(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            StreamBuilder(
-              stream: FirebaseFirestore.instance
-                  .collectionGroup('vertirenary')
-                  .snapshots(),
-              builder: (BuildContext context,
-                  AsyncSnapshot<QuerySnapshot> snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(
-                    child: CircularProgressIndicator(),
-                  );
-                }
-                if (snapshot.hasError) {
-                  return Center(
-                    child: Text('Error: ${snapshot.error}'),
-                  );
-                }
-
+        child: FutureBuilder(
+            future:
+                FirebaseFirestore.instance.collectionGroup("vertirenary").get(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return LinearProgressIndicator(
+                  color: maincolor,
+                );
+              } else if (!snapshot.hasData) {
+                debugPrint(servicecat);
+                return const Center(
+                    child: MainFont(title: "Service not Available"));
+              } else {
                 double userLat = double.parse("${provider.usermapping!.lat}");
-                double maxRadius = 10;
+                double maxRadius = 10000;
                 double userLon = double.parse("${provider.usermapping!.long}");
                 List<DocumentSnapshot> vetDocuments = snapshot.data!.docs;
                 List<DocumentSnapshot> nearbyVets = filterVetsByProximity(
-                    userLat, userLon, maxRadius, vetDocuments);
-
+                        userLat, userLon, maxRadius, vetDocuments)
+                    .where((doc) => (doc['services'] as List<dynamic>)
+                        .map((service) => service.toString().toLowerCase())
+                        .contains(servicecat.toLowerCase()))
+                    .toList();
                 return ListView.builder(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
@@ -180,10 +166,8 @@ class _ListofVeterinaryState extends State<ListofVeterinary> {
                     }
                   },
                 );
-              },
-            ),
-          ],
-        ),
+              }
+            }),
       ),
     );
   }

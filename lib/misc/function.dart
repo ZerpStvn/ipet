@@ -13,9 +13,21 @@ String splitWords(String words) {
 }
 
 List<Map<String, dynamic>> services = [
-  {"name": "Vaccination", "image": "assets/services/service1.png"},
-  {"name": "Operation", "image": "assets/services/service2.png"},
-  {"name": "Anti Gams", "image": "assets/services/service3.png"}
+  {
+    "name": "Vaccination",
+    "image": "assets/services/service1.png",
+    "con": "vaccination"
+  },
+  {
+    "name": "Operation",
+    "image": "assets/services/service2.png",
+    "con": "operation"
+  },
+  {
+    "name": "Grooming",
+    "image": "assets/services/service3.png",
+    "con": "grooming"
+  }
 ];
 
 double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
