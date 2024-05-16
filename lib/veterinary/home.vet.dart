@@ -69,7 +69,7 @@ class _HomeScreenVeterinaryState extends State<HomeScreenVeterinary> {
                       });
                     }),
                 IconBottomBar(
-                    text: "Appointments",
+                    text: "Appoint..",
                     icon: Icons.calendar_month_outlined,
                     selected: _selectedIndex == 1,
                     onPressed: () {

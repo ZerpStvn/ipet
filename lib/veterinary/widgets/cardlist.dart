@@ -1,33 +1,67 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:ipet/client/widgets/eventview.dart';
 import 'package:ipet/misc/themestyle.dart';
+import 'package:ipet/model/Authprovider.dart';
+import 'package:provider/provider.dart';
 
 class CardListView extends StatelessWidget {
   const CardListView({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final provider = Provider.of<AuthProviderClass>(context);
     return Padding(
       padding: const EdgeInsets.only(top: 25.0, right: 25.0, bottom: 15.0),
       child: SizedBox(
         width: MediaQuery.of(context).size.width,
         height: 170,
-        child: ListView(
-          scrollDirection: Axis.horizontal,
-          children: const [
-            CardView(
-                "John",
-                "https://images.unsplash.com/photo-1689972205070-fa0ef37b338e?q=80&w=2129&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-                "April 8, 204 8:00 AM"),
-            CardView(
-                "Natalie ",
-                "https://images.unsplash.com/photo-1673422862662-6e6fb19d3f6c?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-                "April 9, 204 8:00 AM"),
-            CardView(
-                "Mark",
-                "https://images.unsplash.com/photo-1689969936220-096f886bd0e3?q=80&w=2071&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-                "April 10, 204 8:00 AM"),
-          ],
-        ),
+        child: FutureBuilder(
+            future: FirebaseFirestore.instance
+                .collection('appointment')
+                .doc(provider.userModel!.vetid)
+                .collection('vet')
+                .get(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(
+                  child: CircularProgressIndicator(
+                    color: maincolor,
+                  ),
+                );
+              } else if (!snapshot.hasData) {
+                return const MainFont(title: "No Scheduled Appointments");
+              } else {
+                return ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    shrinkWrap: true,
+                    itemCount: snapshot.data!.docs.length,
+                    itemBuilder: (context, index) {
+                      var datafetch = snapshot.data!.docs[index].data();
+                      var getid = snapshot.data!.docs[index].id;
+                      Timestamp timestamp =
+                          datafetch['appoinmentdate'] ?? Timestamp.now();
+                      DateTime dateTime = timestamp.toDate();
+                      String formattedDate =
+                          DateFormat('MMMM dd, yyyy h:mm a').format(dateTime);
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => EventViewFormat(
+                                        istitle: false,
+                                        vetid: getid,
+                                        isadmin: true,
+                                      )));
+                        },
+                        child: CardView("${datafetch['name']}",
+                            "${datafetch['profile']}", formattedDate),
+                      );
+                    });
+              }
+            }),
       ),
     );
   }

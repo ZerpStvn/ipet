@@ -6,17 +6,21 @@ import 'package:ipet/misc/themestyle.dart';
 class RatingsView extends StatelessWidget {
   const RatingsView({
     super.key,
-    required this.widget,
+    this.widget,
+    this.adminprofile,
+    required this.isadmin,
   });
 
-  final ClinicViewSingle widget;
+  final ClinicViewSingle? widget;
+  final bool isadmin;
+  final String? adminprofile;
 
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
         stream: FirebaseFirestore.instance
             .collection('ratings')
-            .doc(widget.documentID)
+            .doc(isadmin == false ? widget!.documentID : adminprofile)
             .collection('reviews')
             .orderBy("date", descending: true)
             .snapshots(),

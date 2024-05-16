@@ -8,10 +8,12 @@ import 'package:provider/provider.dart';
 class EventViewFormat extends StatefulWidget {
   final bool istitle;
   final String vetid;
+  final bool isadmin;
   const EventViewFormat({
     super.key,
     required this.istitle,
     required this.vetid,
+    required this.isadmin,
   });
 
   @override
@@ -88,9 +90,10 @@ class _EventViewFormatState extends State<EventViewFormat> {
       body: SingleChildScrollView(
         child: FutureBuilder(
             future: FirebaseFirestore.instance
-                .collection("userappointment")
+                .collection(
+                    widget.isadmin == false ? "userappointment" : "appointment")
                 .doc(porvider.userModel!.vetid)
-                .collection('user')
+                .collection(widget.isadmin == false ? 'user' : 'vet')
                 .doc(widget.vetid)
                 .get(),
             builder: (context, snapshot) {
@@ -140,7 +143,7 @@ class _EventViewFormatState extends State<EventViewFormat> {
                                             image: DecorationImage(
                                                 fit: BoxFit.cover,
                                                 image: NetworkImage(
-                                                    "${datafetch['vetprofile']}"))),
+                                                    "${widget.isadmin == false ? datafetch['vetprofile'] : datafetch['profile']}"))),
                                       )),
                                   const SizedBox(
                                     width: 9,
@@ -167,7 +170,8 @@ class _EventViewFormatState extends State<EventViewFormat> {
                                           ),
                                           MainFont(
                                               fsize: 15,
-                                              title: "${datafetch['clinic']}"),
+                                              title:
+                                                  "${widget.isadmin == false ? datafetch['clinic'] : datafetch['name']}"),
                                           const SizedBox(
                                             height: 7,
                                           ),
@@ -180,7 +184,9 @@ class _EventViewFormatState extends State<EventViewFormat> {
                                 ],
                               ),
                               const SizedBox(height: 10),
-                              updaterender(datafetch, widget.vetid),
+                              widget.isadmin == false
+                                  ? updaterender(datafetch, widget.vetid)
+                                  : Container(),
                             ],
                           ),
                         ),

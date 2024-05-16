@@ -24,7 +24,9 @@ class _HomeClientMainState extends State<HomeClientMain> {
     if (_atpage == 0) {
       return ClientHomeWidget(provider: provider);
     } else if (_atpage == 1) {
-      return const UserAppointmentcheck();
+      return const UserAppointmentcheck(
+        isvetadmin: false,
+      );
     } else if (_atpage == 2) {
       return ClientMapWidget(
         provider: provider,

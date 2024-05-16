@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ipet/client/widgets/ratingsview.dart';
 import 'package:ipet/misc/function.dart';
 import 'package:ipet/misc/themestyle.dart';
 import 'package:ipet/model/Authprovider.dart';
@@ -95,8 +96,31 @@ class _VeterinaryProfileState extends State<VeterinaryProfile> {
             ],
           ),
           // services
+          const SizedBox(
+            height: 20,
+          ),
+          FutureBuilder<double>(
+            future: calculateRating("${provider.userModel!.vetid}"),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Container();
+              } else if (snapshot.hasError || !snapshot.hasData) {
+                return MainFont(
+                  title: "No Reviews",
+                  color: maincolor,
+                );
+              } else {
+                return MainFont(
+                  title:
+                      "Reviews ${double.parse("${snapshot.data}").toStringAsFixed(1)}",
+                  color: maincolor,
+                );
+              }
+            },
+          ),
+
           Padding(
-            padding: const EdgeInsets.only(top: 40.0),
+            padding: const EdgeInsets.only(top: 10.0),
             child: MainFont(
               title: "Phone number: ${provider.userModel!.pnum}",
               fsize: 15,
@@ -198,6 +222,13 @@ class _VeterinaryProfileState extends State<VeterinaryProfile> {
               return Container();
             },
           ),
+          const SizedBox(
+            height: 30,
+          ),
+          RatingsView(
+            adminprofile: "${provider.userModel!.vetid}",
+            isadmin: true,
+          )
         ],
       ),
     );

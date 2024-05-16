@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:ipet/misc/themestyle.dart';
+import 'package:ipet/veterinary/pages/vetsecheduled.dart';
 
 class Headline extends StatelessWidget {
   const Headline({super.key});
@@ -30,9 +32,17 @@ class Headline extends StatelessWidget {
               ),
             ],
           ),
-          Text(
-            "View More",
-            style: TextStyle(color: maincolor, fontWeight: FontWeight.normal),
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const VetScheduledAppointments()));
+            },
+            child: Text(
+              "View More",
+              style: TextStyle(color: maincolor, fontWeight: FontWeight.normal),
+            ),
           ),
         ],
       ),

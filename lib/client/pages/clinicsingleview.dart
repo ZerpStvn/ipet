@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:ipet/client/widgets/ratingsInformation.dart';
 import 'package:ipet/client/widgets/ratingsreview.dart';
 import 'package:ipet/client/widgets/singlevetData.dart';
+import 'package:ipet/controller/map/polyline.dart';
 import 'package:ipet/misc/function.dart';
 import 'package:ipet/misc/themestyle.dart';
 import 'package:ipet/model/Authprovider.dart';
@@ -110,27 +111,28 @@ class _ClinicViewSingleState extends State<ClinicViewSingle> {
                   children: [
                     Stack(
                       children: [
-                        // SizedBox(
-                        //     width: MediaQuery.of(context).size.width,
-                        //     height: 300,
-                        //     child: VetClinicUserClientPolyline(
-                        //       userLat:
-                        //           double.parse("${userauth.usermapping!.lat}"),
-                        //       userLon:
-                        //           double.parse("${userauth.usermapping!.long}"),
-                        //       clinicLat: double.parse("${data!['lat']}"),
-                        //       clinicLon: double.parse("${data['long']}"),
-                        //       ispolyline: true,
-                        //     )),
-                        Container(
-                          width: MediaQuery.of(context).size.width,
-                          height: 300,
-                          decoration: BoxDecoration(
-                              image: DecorationImage(
-                                  fit: BoxFit.cover,
-                                  image: NetworkImage(
-                                      "${data['imageprofile'] ?? ""}"))),
-                        )
+                        SizedBox(
+                            width: MediaQuery.of(context).size.width,
+                            height: 300,
+                            child: VetClinicUserClientPolyline(
+                              userLat:
+                                  double.parse("${userauth.usermapping!.lat}"),
+                              userLon:
+                                  double.parse("${userauth.usermapping!.long}"),
+                              clinicLat: double.parse("${data!['lat']}"),
+                              clinicLon: double.parse("${data['long']}"),
+                              ispolyline: true,
+                            )),
+
+                        // Container(
+                        //   width: MediaQuery.of(context).size.width,
+                        //   height: 300,
+                        //   decoration: BoxDecoration(
+                        //       image: DecorationImage(
+                        //           fit: BoxFit.cover,
+                        //           image: NetworkImage(
+                        //               "${data['imageprofile'] ?? ""}"))),
+                        // )
                       ],
                     ),
                     const SizedBox(
@@ -454,6 +456,8 @@ class _ClinicViewSingleState extends State<ClinicViewSingle> {
           'clinic': name,
           'clinicid': widget.documentID,
           'status': 0,
+          'purpose': purpose.text,
+          'service': selectedValue,
         });
         await FirebaseFirestore.instance
             .collection('userappointment')
@@ -468,6 +472,8 @@ class _ClinicViewSingleState extends State<ClinicViewSingle> {
           'clinic': name,
           'clinicid': widget.documentID,
           'status': 0,
+          'purpose': purpose.text,
+          'service': selectedValue,
         });
         setState(() {});
       }

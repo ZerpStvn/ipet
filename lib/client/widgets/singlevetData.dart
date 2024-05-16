@@ -114,7 +114,10 @@ class SingleVetData extends StatelessWidget {
           const SizedBox(
             height: 25,
           ),
-          RatingsView(widget: widget),
+          RatingsView(
+            widget: widget,
+            isadmin: false,
+          ),
           const SizedBox(
             height: 10,
           ),

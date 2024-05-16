@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:ipet/misc/themestyle.dart';
+import 'package:ipet/veterinary/pages/calendarvet.dart';
 
 class SHeadline extends StatelessWidget {
   const SHeadline({super.key});
@@ -30,9 +32,15 @@ class SHeadline extends StatelessWidget {
               ),
             ],
           ),
-          Text(
-            "View More",
-            style: TextStyle(color: maincolor, fontWeight: FontWeight.normal),
+          GestureDetector(
+            onTap: () {
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => const CalendarVet()));
+            },
+            child: Text(
+              "View More",
+              style: TextStyle(color: maincolor, fontWeight: FontWeight.normal),
+            ),
           ),
         ],
       ),

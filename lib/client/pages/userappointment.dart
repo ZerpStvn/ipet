@@ -1,18 +1,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:ipet/client/widgets/eventview.dart';
 import 'package:ipet/misc/function.dart';
 import 'package:ipet/misc/themestyle.dart';
 import 'package:ipet/model/Authprovider.dart';
-import 'package:ipet/model/events.dart';
 import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class UserAppointmentcheck extends StatefulWidget {
-  const UserAppointmentcheck({super.key});
+  final bool isvetadmin;
+  const UserAppointmentcheck({super.key, required this.isvetadmin});
 
   @override
   State<UserAppointmentcheck> createState() => _UserAppointmentcheckState();
@@ -40,18 +38,19 @@ class _UserAppointmentcheckState extends State<UserAppointmentcheck> {
     try {
       final provider = Provider.of<AuthProviderClass>(context, listen: false);
       final snapshot = await FirebaseFirestore.instance
-          .collection('userappointment')
+          .collection(
+              widget.isvetadmin == false ? 'userappointment' : 'appointment')
           .doc(provider.userModel!.vetid)
-          .collection('user')
+          .collection(widget.isvetadmin == false ? 'user' : 'vet')
           .get();
 
-      final List<Map<String, dynamic>> fetchedData =
-          snapshot.docs.map((doc) => doc.data()).toList();
+      // final List<Map<String, dynamic>> fetchedData =
+      //     snapshot.docs.map((doc) => doc.data()).toList();
 
       Map<DateTime, List<AppointEvent>> newEvents = {};
       for (var doc in snapshot.docs) {
         var data = doc.data();
-        data['id'] = doc.id; // Add the document ID to the map
+        data['id'] = doc.id;
 
         Timestamp timestamp = data['appoinmentdate'];
         DateTime dateTime = timestamp.toDate();
@@ -64,17 +63,20 @@ class _UserAppointmentcheckState extends State<UserAppointmentcheck> {
         }
 
         newEvents[dateOnly]!.add(AppointEvent(
-            name: data['clinic'],
-            status: data['status'],
-            date: formattedDate,
-            vetid: doc.id));
+          name: data['clinic'],
+          status: data['status'],
+          date: formattedDate,
+          vetid: doc.id,
+          userid: data['userid'],
+          username: data['name'],
+        ));
+
+        debugPrint('Events ID: ${doc.id}');
       }
 
       setState(() {
         events = newEvents;
       });
-
-      debugPrint('Events: $events');
     } catch (error) {
       debugPrint("Error fetching data: $error");
     }
@@ -97,7 +99,7 @@ class _UserAppointmentcheckState extends State<UserAppointmentcheck> {
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 50),
+          SizedBox(height: widget.isvetadmin == false ? 50 : 10),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: TableCalendar(
@@ -129,53 +131,62 @@ class _UserAppointmentcheckState extends State<UserAppointmentcheck> {
               events[DateTime(_selectedDay!.year, _selectedDay!.month,
                       _selectedDay!.day)] !=
                   null)
-            DataTable(
-              columns: const [
-                DataColumn(label: MainFont(title: "Appoi...")),
-                DataColumn(label: MainFont(title: "Status")),
-                DataColumn(label: MainFont(title: "Action")),
-              ],
-              rows: events[DateTime(_selectedDay!.year, _selectedDay!.month,
-                      _selectedDay!.day)]!
-                  .map((event) {
-                return DataRow(cells: [
-                  DataCell(
-                      MainFont(title: truncateWithEllipsis(7, event.vetid))),
-                  DataCell(Container(
-                    padding: const EdgeInsets.all(7),
-                    decoration: BoxDecoration(
-                      color: renderColor(event.status),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: MainFont(
-                      color: Colors.white,
-                      title: event.status == 0
-                          ? "Active"
-                          : event.status == 1
-                              ? "Cancelled"
-                              : "Done",
-                    ),
-                  )),
-                  DataCell(GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => EventViewFormat(
-                                  istitle: false, vetid: event.vetid)));
-                    },
-                    child: Container(
+            Center(
+              child: DataTable(
+                columns: const [
+                  DataColumn(label: MainFont(title: "Appoi...")),
+                  DataColumn(label: MainFont(title: "Status")),
+                  DataColumn(label: MainFont(title: "Action")),
+                ],
+                rows: events[DateTime(_selectedDay!.year, _selectedDay!.month,
+                        _selectedDay!.day)]!
+                    .map((event) {
+                  return DataRow(cells: [
+                    DataCell(MainFont(
+                        title: truncateWithEllipsis(
+                            widget.isvetadmin == true ? 11 : 7,
+                            widget.isvetadmin == false
+                                ? event.name
+                                : event.username))),
+                    DataCell(Container(
                       padding: const EdgeInsets.all(7),
                       decoration: BoxDecoration(
-                        color: maincolor,
+                        color: renderColor(event.status),
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child:
-                          const MainFont(color: Colors.white, title: "View.."),
-                    ),
-                  )),
-                ]);
-              }).toList(),
+                      child: MainFont(
+                        color: Colors.white,
+                        title: event.status == 0
+                            ? "Active"
+                            : event.status == 1
+                                ? "Cancelled"
+                                : "Done",
+                      ),
+                    )),
+                    DataCell(GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => EventViewFormat(
+                                      istitle: false,
+                                      vetid: event.vetid,
+                                      isadmin: widget.isvetadmin,
+                                    )));
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(7),
+                        decoration: BoxDecoration(
+                          color: maincolor,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const MainFont(
+                            color: Colors.white, title: "View.."),
+                      ),
+                    )),
+                  ]);
+                }).toList(),
+              ),
             )
           else
             const SizedBox(
@@ -206,9 +217,13 @@ class AppointEvent {
   int status;
   String date;
   String vetid;
+  String username;
+  String userid;
 
   AppointEvent(
       {required this.vetid,
+      required this.userid,
+      required this.username,
       required this.name,
       required this.status,
       required this.date});
