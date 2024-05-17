@@ -133,8 +133,12 @@ class _UserAppointmentcheckState extends State<UserAppointmentcheck> {
                   null)
             Center(
               child: DataTable(
-                columns: const [
-                  DataColumn(label: MainFont(title: "Appoi...")),
+                columns: [
+                  DataColumn(
+                      label: MainFont(
+                          title: widget.isvetadmin == true
+                              ? "Appoint.."
+                              : "Appointment")),
                   DataColumn(label: MainFont(title: "Status")),
                   DataColumn(label: MainFont(title: "Action")),
                 ],
@@ -144,7 +148,7 @@ class _UserAppointmentcheckState extends State<UserAppointmentcheck> {
                   return DataRow(cells: [
                     DataCell(MainFont(
                         title: truncateWithEllipsis(
-                            widget.isvetadmin == true ? 11 : 7,
+                            widget.isvetadmin == true ? 11 : 17,
                             widget.isvetadmin == false
                                 ? event.name
                                 : event.username))),

@@ -1,8 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:ipet/admin/pages/home.admin.dart';
 import 'package:ipet/client/controller/signup.dart';
 import 'package:ipet/client/pages/home.user.dart';
 import 'package:ipet/controller/signup.dart';
@@ -44,7 +42,7 @@ class MyApp extends StatelessWidget {
           '/vetuser': (context) => const HomeScreenVeterinary()
         },
         initialRoute: '/',
-        home: kIsWeb ? const HomeAdmin() : const HomeUser(),
+        home:  const HomeUser(),
       ),
     );
   }

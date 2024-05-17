@@ -143,17 +143,15 @@ class _OnboardingPageState extends State<OnboardingPage> {
               padding: const EdgeInsets.all(8.0),
               child: GlobalButton(
                   callback: () {
-                    _currentIndex == 1
-                        ? saveonboarding().then((value) =>
-                            Navigator.pushAndRemoveUntil(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        const GloballoginController()),
-                                (route) => false))
-                        : null;
+                    saveonboarding().then((value) =>
+                        Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    const GloballoginController()),
+                            (route) => false));
                   },
-                  title: _currentIndex == 1 ? "Continue" : "Next"),
+                  title: _currentIndex == 1 ? "Skip" : "Continue"),
             )
           ],
         ),

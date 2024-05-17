@@ -56,11 +56,20 @@ dependencies:
   flutter_rating_bar: ^4.0.1
   dropdown_button2: ^2.3.9
   table_calendar: ^3.1.1
+  flutter_launcher_icons: ^0.13.1
   # location: ^6.0.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/ic_launcher.png"
+  adaptive_icon_foreground: "assets/ic_launcher_foreground.png"
+  adaptive_icon_background: "assets/ic_launcher_background.png"
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is

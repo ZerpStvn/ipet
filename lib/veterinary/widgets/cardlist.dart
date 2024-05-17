@@ -32,7 +32,7 @@ class CardListView extends StatelessWidget {
                 );
               } else if (!snapshot.hasData) {
                 return const MainFont(title: "No Scheduled Appointments");
-              } else {
+              } else if (snapshot.hasData) {
                 return ListView.builder(
                     scrollDirection: Axis.horizontal,
                     shrinkWrap: true,
@@ -60,6 +60,8 @@ class CardListView extends StatelessWidget {
                             "${datafetch['profile']}", formattedDate),
                       );
                     });
+              } else {
+                return const MainFont(title: "No Scheduled Appointments");
               }
             }),
       ),

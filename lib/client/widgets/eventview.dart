@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:ipet/misc/themestyle.dart';
 import 'package:ipet/model/Authprovider.dart';
 import 'package:provider/provider.dart';
+import 'package:table_calendar/table_calendar.dart';
 
 class EventViewFormat extends StatefulWidget {
   final bool istitle;
@@ -110,88 +111,145 @@ class _EventViewFormatState extends State<EventViewFormat> {
                   DateTime dateTime = timestamp.toDate();
                   String formattedDate =
                       DateFormat('MMMM dd, yyyy h:mm a').format(dateTime);
-                  return SizedBox(
-                    width: MediaQuery.of(context).size.width,
-                    height: widget.istitle == false ? 260 : 290,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        SizedBox(height: widget.istitle == true ? 30 : 0),
-                        widget.istitle == true
-                            ? const MainFont(
-                                title: "Recent Appointment",
-                                fsize: 16,
-                              )
-                            : Container(),
-                        const SizedBox(height: 10),
-                        Padding(
-                          padding: const EdgeInsets.all(11.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              Row(
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width,
+                        height: widget.isadmin == false ? 210 : 160,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            SizedBox(height: widget.istitle == true ? 30 : 0),
+                            widget.istitle == true
+                                ? const MainFont(
+                                    title: "Recent Appointment",
+                                    fsize: 16,
+                                  )
+                                : Container(),
+                            const SizedBox(height: 10),
+                            Padding(
+                              padding: const EdgeInsets.all(11.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.start,
                                 children: [
-                                  Expanded(
-                                      flex: 1,
-                                      child: Container(
-                                        height: 110,
-                                        decoration: BoxDecoration(
-                                            borderRadius:
-                                                BorderRadius.circular(10),
-                                            image: DecorationImage(
-                                                fit: BoxFit.cover,
-                                                image: NetworkImage(
-                                                    "${widget.isadmin == false ? datafetch['vetprofile'] : datafetch['profile']}"))),
-                                      )),
-                                  const SizedBox(
-                                    width: 9,
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                          flex: 1,
+                                          child: Container(
+                                            height: 110,
+                                            decoration: BoxDecoration(
+                                                borderRadius:
+                                                    BorderRadius.circular(10),
+                                                image: DecorationImage(
+                                                    fit: BoxFit.cover,
+                                                    image: NetworkImage(
+                                                        "${widget.isadmin == false ? datafetch['vetprofile'] : datafetch['profile']}"))),
+                                          )),
+                                      const SizedBox(
+                                        width: 9,
+                                      ),
+                                      Expanded(
+                                          flex: 2,
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.start,
+                                            children: [
+                                              Chip(
+                                                  backgroundColor: maincolor,
+                                                  side: BorderSide(
+                                                      width: 1,
+                                                      color: maincolor),
+                                                  label: const MainFont(
+                                                    color: Colors.white,
+                                                    title: "Appoinment",
+                                                    fsize: 9,
+                                                  )),
+                                              const SizedBox(
+                                                height: 14,
+                                              ),
+                                              MainFont(
+                                                  fsize: 15,
+                                                  title:
+                                                      "${widget.isadmin == false ? datafetch['clinic'] : datafetch['name']}"),
+                                              const SizedBox(
+                                                height: 7,
+                                              ),
+                                              MainFont(
+                                                title: formattedDate,
+                                                fsize: 13,
+                                              ),
+                                            ],
+                                          ))
+                                    ],
                                   ),
-                                  Expanded(
-                                      flex: 2,
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        children: [
-                                          Chip(
-                                              backgroundColor: maincolor,
-                                              side: BorderSide(
-                                                  width: 1, color: maincolor),
-                                              label: const MainFont(
-                                                color: Colors.white,
-                                                title: "Appoinment",
-                                                fsize: 9,
-                                              )),
-                                          const SizedBox(
-                                            height: 14,
-                                          ),
-                                          MainFont(
-                                              fsize: 15,
-                                              title:
-                                                  "${widget.isadmin == false ? datafetch['clinic'] : datafetch['name']}"),
-                                          const SizedBox(
-                                            height: 7,
-                                          ),
-                                          MainFont(
-                                            title: formattedDate,
-                                            fsize: 13,
-                                          ),
-                                        ],
-                                      ))
+                                  const SizedBox(height: 10),
+                                  widget.isadmin == false
+                                      ? updaterender(datafetch, widget.vetid)
+                                      : Container(),
                                 ],
                               ),
-                              const SizedBox(height: 10),
-                              widget.isadmin == false
-                                  ? updaterender(datafetch, widget.vetid)
-                                  : Container(),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
+                      ),
+                      widget.isadmin == true
+                          ? Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const SizedBox(height: 20),
+                                  Center(
+                                    child: MainFont(
+                                        align: TextAlign.center,
+                                        title:
+                                            "Please remember to arrive 30 minutes\nbefore your appointment."),
+                                  ),
+                                  TableCalendar(
+                                    firstDay: DateTime.utc(2010, 10, 16),
+                                    lastDay: DateTime.utc(2030, 3, 14),
+                                    focusedDay: DateTime.now(),
+                                  ),
+                                  const SizedBox(
+                                    height: 20,
+                                  ),
+                                  MainFont(
+                                    title: "Service",
+                                    fsize: 20,
+                                  ),
+                                  const SizedBox(
+                                    height: 15,
+                                  ),
+                                  Chip(
+                                    label: MainFont(
+                                        color: Colors.white,
+                                        title: "${datafetch['service']}"),
+                                    backgroundColor: maincolor,
+                                  ),
+                                  MainFont(
+                                    title: "Purpose ",
+                                    fsize: 20,
+                                  ),
+                                  const SizedBox(
+                                    height: 15,
+                                  ),
+                                  Chip(
+                                    label: MainFont(
+                                        color: Colors.white,
+                                        title: "${datafetch['purpose']}"),
+                                    backgroundColor: maincolor,
+                                  )
+                                ],
+                              ),
+                            )
+                          : Container()
+                    ],
                   );
                 } else {
                   return const Center(
