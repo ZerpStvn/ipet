@@ -106,13 +106,13 @@ class CardView extends StatelessWidget {
                       image: NetworkImage(imageUrl), fit: BoxFit.cover)),
             ),
             const Spacer(),
-            Text(text,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: Colors.black,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                )),
+            MainFont(
+              title: text,
+              align: TextAlign.center,
+              fweight: FontWeight.bold,
+              color: Colors.black,
+              fsize: 18,
+            ),
             const SizedBox(
               height: 5,
             ),

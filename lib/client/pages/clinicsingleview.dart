@@ -119,7 +119,7 @@ class _ClinicViewSingleState extends State<ClinicViewSingle> {
                                   double.parse("${userauth.usermapping!.lat}"),
                               userLon:
                                   double.parse("${userauth.usermapping!.long}"),
-                              clinicLat: double.parse("${data!['lat']}"),
+                              clinicLat: double.parse("${data['lat']}"),
                               clinicLon: double.parse("${data['long']}"),
                               ispolyline: true,
                             )),

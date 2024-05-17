@@ -198,57 +198,57 @@ class _EventViewFormatState extends State<EventViewFormat> {
                           ],
                         ),
                       ),
-                      widget.isadmin == true
-                          ? Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const SizedBox(height: 20),
-                                  Center(
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const SizedBox(height: 20),
+                            widget.isadmin == false
+                                ? Center(
                                     child: MainFont(
                                         align: TextAlign.center,
                                         title:
                                             "Please remember to arrive 30 minutes\nbefore your appointment."),
-                                  ),
-                                  TableCalendar(
-                                    firstDay: DateTime.utc(2010, 10, 16),
-                                    lastDay: DateTime.utc(2030, 3, 14),
-                                    focusedDay: DateTime.now(),
-                                  ),
-                                  const SizedBox(
-                                    height: 20,
-                                  ),
-                                  MainFont(
-                                    title: "Service",
-                                    fsize: 20,
-                                  ),
-                                  const SizedBox(
-                                    height: 15,
-                                  ),
-                                  Chip(
-                                    label: MainFont(
-                                        color: Colors.white,
-                                        title: "${datafetch['service']}"),
-                                    backgroundColor: maincolor,
-                                  ),
-                                  MainFont(
-                                    title: "Purpose ",
-                                    fsize: 20,
-                                  ),
-                                  const SizedBox(
-                                    height: 15,
-                                  ),
-                                  Chip(
-                                    label: MainFont(
-                                        color: Colors.white,
-                                        title: "${datafetch['purpose']}"),
-                                    backgroundColor: maincolor,
                                   )
-                                ],
-                              ),
+                                : Container(),
+                            TableCalendar(
+                              firstDay: DateTime.utc(2010, 10, 16),
+                              lastDay: DateTime.utc(2030, 3, 14),
+                              focusedDay: DateTime.now(),
+                            ),
+                            const SizedBox(
+                              height: 20,
+                            ),
+                            MainFont(
+                              title: "Service",
+                              fsize: 20,
+                            ),
+                            const SizedBox(
+                              height: 15,
+                            ),
+                            Chip(
+                              label: MainFont(
+                                  color: Colors.white,
+                                  title: "${datafetch['service']}"),
+                              backgroundColor: maincolor,
+                            ),
+                            MainFont(
+                              title: "Purpose ",
+                              fsize: 20,
+                            ),
+                            const SizedBox(
+                              height: 15,
+                            ),
+                            Chip(
+                              label: MainFont(
+                                  color: Colors.white,
+                                  title: "${datafetch['purpose']}"),
+                              backgroundColor: maincolor,
                             )
-                          : Container()
+                          ],
+                        ),
+                      )
                     ],
                   );
                 } else {

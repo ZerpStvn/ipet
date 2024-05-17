@@ -46,8 +46,8 @@ class _VeterinaryProfileState extends State<VeterinaryProfile> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         MainFont(
-                          title: splitWords(
-                              "${provider.userModel!.nameclinic}sdsafagfaghgththykju"),
+                          title:
+                              splitWords("${provider.userModel!.nameclinic}"),
                           fsize: 21,
                         ),
                         const Row(
