@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:ipet/controller/login.dart';
 import 'package:ipet/controller/mapController.dart';
+import 'package:ipet/misc/themestyle.dart';
 import 'package:ipet/utils/firebasehook.dart';
+import 'package:ipet/utils/signup_aler.dart';
 
 class VetMapping extends StatelessWidget {
   final String documentID;
@@ -15,12 +18,19 @@ class VetMapping extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PopScope(
+      canPop: false,
       onPopInvoked: (didpop) async {
         if (didpop) return;
-        await deleteusermap();
+        handlenotcontinue(context, () {
+          deleteusermap(context);
+        });
       },
       child: Scaffold(
-        appBar: AppBar(),
+        appBar: AppBar(
+          title: MainFont(
+            title: "Mark your Location",
+          ),
+        ),
         body: MappController(
           isclient: isclient,
           documentID: documentID,
@@ -30,9 +40,16 @@ class VetMapping extends StatelessWidget {
     );
   }
 
-  Future<void> deleteusermap() async {
+  Future<void> deleteusermap(BuildContext context) async {
     try {
-      await usercred.doc(documentID).delete();
+      await userAuth.currentUser!.delete();
+      await usercred.doc(documentID).delete().then((value) {
+        Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(
+                builder: (context) => const GloballoginController()),
+            (route) => false);
+      });
     } catch (e) {
       debugPrint("error deleting user");
     }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:ipet/misc/themestyle.dart';
 
-void handlenotcontinue(BuildContext context) {
+void handlenotcontinue(BuildContext context, Function delete) {
   showDialog(
       context: (context),
       builder: (context) {
@@ -9,6 +9,26 @@ void handlenotcontinue(BuildContext context) {
           title: MainFont(title: "Cancel"),
           content: (MainFont(
               title: "Are you sure you wan to cancel\nyour application?")),
+          actions: [
+            TextButton(
+                onPressed: () {
+                  delete();
+                },
+                child: Text("Yes")),
+            TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: Text("No")),
+          ],
         );
       });
 }
+
+// Future deleteccount(String doid) async {
+//   try {
+//     await usercred.doc(doid).delete();
+//   } catch (err) {
+//     debugPrint("$err");
+//   }
+// }
