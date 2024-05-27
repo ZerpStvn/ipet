@@ -131,6 +131,7 @@ class _ClientRegisterState extends State<ClientRegister> {
     } on FirebaseException catch (e) {
       if (mounted) {
         snackbar(context, "Error Signin you up, Try again later");
+        debugPrint("$e");
       }
       setState(() {
         isuploading = false;
