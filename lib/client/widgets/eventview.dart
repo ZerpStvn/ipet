@@ -116,7 +116,7 @@ class _EventViewFormatState extends State<EventViewFormat> {
                     children: [
                       SizedBox(
                         width: MediaQuery.of(context).size.width,
-                        height: widget.isadmin == false ? 210 : 160,
+                        height: widget.isadmin == false ? 230 : 160,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.start,
@@ -203,7 +203,11 @@ class _EventViewFormatState extends State<EventViewFormat> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const SizedBox(height: 20),
+                            widget.isadmin == true
+                                ? SizedBox(
+                                    height: 0,
+                                  )
+                                : SizedBox(height: 20),
                             widget.isadmin == false
                                 ? Center(
                                     child: MainFont(
