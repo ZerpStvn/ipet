@@ -1,7 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:ipet/client/pages/home.client.dart';
 import 'package:ipet/controller/selecttype.dart';
+import 'package:ipet/controller/signup.dart';
 import 'package:ipet/misc/snackbar.dart';
 import 'package:ipet/misc/themestyle.dart';
 import 'package:ipet/model/Authprovider.dart';
@@ -213,11 +215,9 @@ class _GloballoginControllerState extends State<GloballoginController> {
                                   ),
                             Center(
                               child: TextButton(
-                                  onPressed: () => Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) =>
-                                              const SelectTypeUser())),
+                                  onPressed: () {
+                                    Navigator.pushNamed(context, "/pet");
+                                  },
                                   child: const Text(
                                       "Don't have an account ? Sign up")),
                             ),

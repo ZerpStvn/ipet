@@ -152,7 +152,7 @@ class _ClientRegisterState extends State<ClientRegister> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                "Register and Find the Best Veterinary Clinic for your pets",
+                "Register and Find the Best Pet Services for your pets",
                 style: TextStyle(
                     fontSize: 25,
                     color: maincolor,
