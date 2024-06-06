@@ -154,6 +154,8 @@ class _ClientMapWidgetState extends State<ClientMapWidget>
     return vetLocations;
   }
 
+  List<double> options = [20.0, 30.0];
+  double currentOptions = 10.0;
   @override
   Widget build(BuildContext context) {
     double heightsize = MediaQuery.of(context).size.height;
@@ -306,7 +308,7 @@ class _ClientMapWidgetState extends State<ClientMapWidget>
                   right: 10,
                   child: Container(
                     padding: const EdgeInsets.all(10),
-                    height: 150,
+                    height: 250,
                     decoration: BoxDecoration(
                         color: maincolor,
                         borderRadius: BorderRadius.circular(10)),
@@ -340,6 +342,42 @@ class _ClientMapWidgetState extends State<ClientMapWidget>
                             });
                           },
                         ),
+                        ListTile(
+                          title: Text(
+                            "20km",
+                            style: TextStyle(color: Colors.white),
+                          ),
+                          leading: Radio(
+                              value: options[0],
+                              groupValue: currentOptions,
+                              onChanged: (value) {
+                                setState(() {
+                                  currentOptions = 20.0;
+                                  debugPrint('$currentOptions');
+                                  double newRadius = currentOptions * 1000;
+                                  updateRadius(newRadius);
+                                  radiusinkm = newRadius / 1000;
+                                });
+                              }),
+                        ),
+                        ListTile(
+                          title: Text(
+                            "30km",
+                            style: TextStyle(color: Colors.white),
+                          ),
+                          leading: Radio(
+                              value: options[1],
+                              groupValue: currentOptions,
+                              onChanged: (value) {
+                                setState(() {
+                                  currentOptions = 30.0;
+                                  double newRadius = currentOptions * 1000;
+                                  updateRadius(newRadius);
+                                  radiusinkm = newRadius / 1000;
+                                  debugPrint('$currentOptions');
+                                });
+                              }),
+                        )
                       ],
                     ),
                   ),
