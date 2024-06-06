@@ -12,14 +12,14 @@ void handlenotcontinue(BuildContext context, Function delete) {
           actions: [
             TextButton(
                 onPressed: () {
-                  delete();
-                },
-                child: Text("Yes")),
-            TextButton(
-                onPressed: () {
                   Navigator.pop(context);
                 },
                 child: Text("No")),
+            TextButton(
+                onPressed: () {
+                  delete();
+                },
+                child: Text("Yes")),
           ],
         );
       });

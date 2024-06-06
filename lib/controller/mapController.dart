@@ -122,6 +122,7 @@ class _MappControllerState extends State<MappController> {
     setState(() {
       latitude = latLng.latitude.toString();
       longtitude = latLng.longitude.toString();
+      debugPrint("lat ${latitude}, long ${longtitude}");
     });
     _addMarker(latLng);
   }
@@ -171,7 +172,7 @@ class _MappControllerState extends State<MappController> {
     try {
       await usercred
           .doc(widget.documentID)
-          .collection('vertirenary')
+          .collection('client')
           .doc(widget.documentID)
           .update({"lat": latitude, "long": longtitude}).then((value) => {
                 checknavigate(),

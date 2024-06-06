@@ -148,7 +148,7 @@ class _UserAppointmentcheckState extends State<UserAppointmentcheck> {
                   return DataRow(cells: [
                     DataCell(MainFont(
                         title: truncateWithEllipsis(
-                            widget.isvetadmin == true ? 11 : 17,
+                            widget.isvetadmin == true ? 5 : 5,
                             widget.isvetadmin == false
                                 ? event.name
                                 : event.username))),

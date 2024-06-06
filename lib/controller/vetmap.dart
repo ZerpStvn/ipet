@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ipet/client/pages/home.client.dart';
 import 'package:ipet/controller/login.dart';
 import 'package:ipet/controller/mapController.dart';
 import 'package:ipet/misc/themestyle.dart';
@@ -22,7 +23,13 @@ class VetMapping extends StatelessWidget {
       onPopInvoked: (didpop) async {
         if (didpop) return;
         handlenotcontinue(context, () {
-          deleteusermap(context);
+          ishome == false
+              ? deleteusermap(context)
+              : Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const HomeClientMain()),
+                  (route) => false);
         });
       },
       child: Scaffold(

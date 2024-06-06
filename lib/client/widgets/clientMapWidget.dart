@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:ipet/client/controller/listofclinic.dart';
 import 'package:ipet/client/pages/searchpage.dart';
+import 'package:ipet/controller/vetmap.dart';
 import 'package:ipet/misc/function.dart';
 import 'package:ipet/misc/themestyle.dart';
 import 'package:ipet/model/Authprovider.dart';
@@ -300,6 +301,30 @@ class _ClientMapWidgetState extends State<ClientMapWidget>
                       )
                     ],
                   ))),
+
+          Positioned(
+              top: 112,
+              left: 10,
+              child: Container(
+                  height: 40,
+                  width: 40,
+                  decoration: BoxDecoration(
+                      color: maincolor,
+                      borderRadius: BorderRadius.circular(10)),
+                  child: IconButton(
+                      onPressed: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => VetMapping(
+                                    documentID: "${provider.userModel!.vetid}",
+                                    ishome: true,
+                                    isclient: true)));
+                      },
+                      icon: Icon(
+                        Icons.location_pin,
+                        color: Colors.white,
+                      )))),
 
           isradactive == true
               ? Positioned(
