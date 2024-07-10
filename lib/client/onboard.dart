@@ -151,7 +151,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                                     const GloballoginController()),
                             (route) => false));
                   },
-                  title: _currentIndex == 1 ? "Continue" : "Next"),
+                  title: _currentIndex == 1 ? "Skip" : "Continue"),
             )
           ],
         ),

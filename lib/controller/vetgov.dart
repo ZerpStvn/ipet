@@ -2,11 +2,23 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:ipet/controller/uploadimagefield.dart';
+import 'package:ipet/controller/vetmap.dart';
 import 'package:ipet/misc/formtext.dart';
+import 'package:ipet/misc/snackbar.dart';
 import 'package:ipet/misc/themestyle.dart';
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
+import 'package:ipet/model/vetirinary.dart';
+import 'package:ipet/utils/firebasehook.dart';
 
 class VetGovController extends StatefulWidget {
-  const VetGovController({super.key});
+  final String documentID;
+  final bool ishome;
+  const VetGovController({
+    super.key,
+    required this.documentID,
+    required this.ishome,
+  });
 
   @override
   State<VetGovController> createState() => _VetGovControllerState();
@@ -15,19 +27,35 @@ class VetGovController extends StatefulWidget {
 class _VetGovControllerState extends State<VetGovController> {
   final _formkey = GlobalKey<FormState>();
   final TextEditingController tinID = TextEditingController();
-  final ImagePicker _imagePicker = ImagePicker();
-
-  XFile? xFile;
+  final ImagePicker _imageDTI = ImagePicker();
+  final ImagePicker _imageBIR = ImagePicker();
+  final VeterinaryModel veterinaryModel = VeterinaryModel();
+  XFile? xfiledti;
+  XFile? xfilebir;
   bool isobscure = true;
   bool isconfirm = true;
-  Future<void> pickimage() async {
-    XFile? filepath = await _imagePicker.pickImage(source: ImageSource.gallery);
+  bool isuploading = false;
+
+  Future<void> pickimageDTI() async {
+    XFile? filepath = await _imageDTI.pickImage(source: ImageSource.gallery);
 
     setState(() {
       if (filepath != null) {
-        xFile = filepath;
+        xfiledti = filepath;
       } else {
-        xFile = null;
+        xfiledti = null;
+      }
+    });
+  }
+
+  Future<void> pickimageBIR() async {
+    XFile? filepath = await _imageBIR.pickImage(source: ImageSource.gallery);
+
+    setState(() {
+      if (filepath != null) {
+        xfilebir = filepath;
+      } else {
+        xfilebir = null;
       }
     });
   }
@@ -36,7 +64,103 @@ class _VetGovControllerState extends State<VetGovController> {
   void dispose() {
     super.dispose();
     tinID.dispose();
-    ;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  Future<String> uploadImageToFirebaseBIR(String imagePath) async {
+    firebase_storage.Reference storageRef = firebase_storage
+        .FirebaseStorage.instance
+        .ref()
+        .child('govid')
+        .child(DateTime.now().millisecondsSinceEpoch.toString());
+    firebase_storage.UploadTask uploadTask =
+        storageRef.putFile(File(imagePath));
+
+    firebase_storage.TaskSnapshot taskSnapshot = await uploadTask;
+    String downloadURL = await taskSnapshot.ref.getDownloadURL();
+
+    return downloadURL;
+  }
+
+  Future<String> uploadImageToFirebaseDTI(String imagePath) async {
+    firebase_storage.Reference storageRef = firebase_storage
+        .FirebaseStorage.instance
+        .ref()
+        .child('govid')
+        .child(DateTime.now().millisecondsSinceEpoch.toString());
+    firebase_storage.UploadTask uploadTask =
+        storageRef.putFile(File(imagePath));
+
+    firebase_storage.TaskSnapshot taskSnapshot = await uploadTask;
+    String downloadURL = await taskSnapshot.ref.getDownloadURL();
+
+    return downloadURL;
+  }
+
+  Future<void> handlegovid() async {
+    setState(() {
+      isuploading = true;
+    });
+    try {
+      if (xfiledti == null) {
+        snackbar(context, "Please upload DTI permit");
+        setState(() {
+          isuploading = false;
+        });
+      } else if (xfilebir == null) {
+        snackbar(context, "Please upload BIR permit");
+        setState(() {
+          isuploading = false;
+        });
+      } else {
+        if (_formkey.currentState!.validate()) {
+          String birfile = await uploadImageToFirebaseBIR(xfilebir!.path);
+          String dtifile = await uploadImageToFirebaseDTI(xfiledti!.path);
+          String tinid = tinID.text;
+          await usercred
+              .doc(widget.documentID)
+              .collection('vertirenary')
+              .doc(widget.documentID)
+              .update({
+            "tin": tinid,
+            "dti": dtifile,
+            "bir": birfile,
+          }).then((value) {
+            ishome();
+            setState(() {
+              isuploading = false;
+            });
+            debugPrint(widget.documentID);
+          });
+        }
+      }
+    } catch (error) {
+      if (mounted) {
+        snackbar(context, "$error");
+      }
+      setState(() {
+        isuploading = false;
+      });
+    }
+  }
+
+  void ishome() {
+    if (widget.ishome) {
+      Navigator.pushNamedAndRemoveUntil(context, '/vetuser', (route) => false);
+    } else {
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => VetMapping(
+                    documentID: widget.documentID,
+                    ishome: false,
+                    isclient: false,
+                  )));
+    }
   }
 
   @override
@@ -75,13 +199,44 @@ class _VetGovControllerState extends State<VetGovController> {
                 ),
                 Textformtype(
                     textEditingController: tinID,
-                    uppertitle: "Provide clinic TIN",
-                    fieldname: "TIN ID",
+                    uppertitle: "Provide TIN Number",
+                    fieldname: "000-000-000-00000",
                     textvalidator: "TIN 000-000-000-00000"),
                 const SizedBox(
                   height: 15,
                 ),
-                GlobalButton(callback: () {}, title: "Proceed")
+                UploadImageField(
+                  title: "Upload DTI Permit",
+                  xfiledti: xfiledti,
+                  pickimage: () {
+                    pickimageDTI();
+                  },
+                ),
+                const SizedBox(
+                  height: 15,
+                ),
+                UploadImageField(
+                  title: "Upload BIR Permit",
+                  xfiledti: xfilebir,
+                  pickimage: () {
+                    pickimageBIR();
+                  },
+                ),
+                const SizedBox(
+                  height: 15,
+                ),
+                isuploading == false
+                    ? GlobalButton(
+                        callback: () {
+                          handlegovid();
+                          debugPrint("${widget.ishome}");
+                        },
+                        title: "Proceed")
+                    : Center(
+                        child: CircularProgressIndicator(
+                          color: maincolor,
+                        ),
+                      )
               ],
             ),
           ),
@@ -89,4 +244,12 @@ class _VetGovControllerState extends State<VetGovController> {
       ),
     );
   }
+
+  // Future<void> deleteuser() async {
+  //   try {
+  //     await usercred.doc(widget.documentID).delete();
+  //   } catch (e) {
+  //     debugPrint("error deleting user");
+  //   }
+  // }
 }

@@ -1,11 +1,15 @@
 import 'dart:io';
-
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:ipet/controller/vetgov.dart';
+import 'package:ipet/controller/vetcred.dart';
 import 'package:ipet/misc/formtext.dart';
+import 'package:ipet/misc/snackbar.dart';
 import 'package:ipet/misc/themestyle.dart';
+import 'package:ipet/model/users.dart';
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
+import 'package:ipet/utils/characterID.dart';
+import 'package:ipet/utils/firebasehook.dart';
 
 class VetController extends StatefulWidget {
   const VetController({super.key});
@@ -24,10 +28,13 @@ class _VetControllerState extends State<VetController> {
   final TextEditingController password = TextEditingController();
   final TextEditingController cpassword = TextEditingController();
   final ImagePicker _imagePicker = ImagePicker();
-
+  final UsersModel usersModel = UsersModel();
   XFile? xFile;
   bool isobscure = true;
   bool isconfirm = true;
+  bool isuploading = false;
+  String? imageprofile;
+
   Future<void> pickimage() async {
     XFile? filepath = await _imagePicker.pickImage(source: ImageSource.gallery);
 
@@ -38,6 +45,12 @@ class _VetControllerState extends State<VetController> {
         xFile = null;
       }
     });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    generateRandomString();
   }
 
   @override
@@ -52,6 +65,102 @@ class _VetControllerState extends State<VetController> {
     cpassword.dispose();
   }
 
+  Future<String> uploadImageToFirebase(String imagePath) async {
+    firebase_storage.Reference storageRef = firebase_storage
+        .FirebaseStorage.instance
+        .ref()
+        .child('userprofile')
+        .child(DateTime.now().millisecondsSinceEpoch.toString());
+    firebase_storage.UploadTask uploadTask =
+        storageRef.putFile(File(imagePath));
+
+    firebase_storage.TaskSnapshot taskSnapshot = await uploadTask;
+    String downloadURL = await taskSnapshot.ref.getDownloadURL();
+
+    return downloadURL;
+  }
+
+  Future<void> handlecreateuser() async {
+    String userprofleurl = await uploadImageToFirebase(xFile!.path);
+    usersModel.imageprofile = userprofleurl;
+    usersModel.nameclinic = nameofclinic.text;
+    usersModel.fname = ownersfirstname.text;
+    usersModel.lname = ownerslastname.text;
+    usersModel.pnum = phonenumber.text;
+    usersModel.email = emailaddress.text;
+    usersModel.pass = password.text;
+    usersModel.role = 1;
+    usersModel.vetid = userAuth.currentUser!.uid;
+    await usercred
+        .doc(userAuth.currentUser!.uid)
+        .set(usersModel.usersModelmap())
+        .then((value) => {
+              setState(() {
+                isuploading = false;
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => VetCreds(
+                              documentID: userAuth.currentUser!.uid,
+                              clinicname: nameofclinic.text,
+                              imageprofile: userprofleurl,
+                            )));
+              })
+            });
+  }
+
+  Future<void> uploadfirstcred() async {
+    setState(() {
+      isuploading = true;
+    });
+    try {
+      if (_formkey.currentState!.validate()) {
+        if (xFile != null) {
+          await userAuth
+              .createUserWithEmailAndPassword(
+                  email: emailaddress.text, password: password.text)
+              .then((value) => handlecreateuser());
+        } else {
+          setState(() {
+            imageprofile = "Add your profile picture";
+            isuploading = false;
+          });
+        }
+      } else {
+        setState(() {
+          isuploading = false;
+        });
+      }
+    } on FirebaseException catch (e) {
+      setState(() {
+        switch (e.code) {
+          case "invalid-email":
+            snackbar(context, "Your email address is invalid.");
+            break;
+          case "wrong-password":
+            snackbar(context, "Your password is wrong.");
+            break;
+          case "user-not-found":
+            snackbar(context, "User with this email doesn't exist.");
+            break;
+          case "user-disabled":
+            snackbar(context, "User with this email has been disabled.");
+            break;
+          case "too-many-requests":
+            snackbar(context, "Too many requests");
+            break;
+          case "operation-not-allowed":
+            snackbar(
+                context, "Signing in with Email and Password is not enabled.");
+            break;
+          default:
+            snackbar(context, "Check your email, password and try again");
+        }
+        isuploading = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -62,7 +171,7 @@ class _VetControllerState extends State<VetController> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "Register Your Clinic with Us",
+              "Register Your Clinic\nwith Us",
               style: TextStyle(
                   fontSize: 25, color: maincolor, fontWeight: FontWeight.bold),
             ),
@@ -109,13 +218,16 @@ class _VetControllerState extends State<VetController> {
                       ),
               ),
             ),
+            MainFont(
+              title: imageprofile ?? "",
+              color: Colors.red,
+            ),
             const SizedBox(
               height: 15,
             ),
             Textformtype(
                 textEditingController: nameofclinic,
                 uppertitle: "What's The Name of Your Clinic?",
-                fieldname: "Clinic mame",
                 textvalidator: "Provide clinic name"),
             const SizedBox(
               height: 15,
@@ -126,7 +238,6 @@ class _VetControllerState extends State<VetController> {
                     child: Textformtype(
                         textEditingController: ownersfirstname,
                         uppertitle: "First Name",
-                        fieldname: "First name",
                         textvalidator: "Enter first name")),
                 const SizedBox(
                   width: 5,
@@ -135,7 +246,6 @@ class _VetControllerState extends State<VetController> {
                     child: Textformtype(
                         textEditingController: ownerslastname,
                         uppertitle: "Last Name",
-                        fieldname: "Last name",
                         textvalidator: "Enter last name")),
               ],
             ),
@@ -145,7 +255,6 @@ class _VetControllerState extends State<VetController> {
             Textformtype(
                 textEditingController: phonenumber,
                 uppertitle: "Phone Number",
-                fieldname: "Phone number",
                 textvalidator: "Provide phone number"),
             const SizedBox(
               height: 15,
@@ -153,7 +262,6 @@ class _VetControllerState extends State<VetController> {
             Textformtype(
                 textEditingController: emailaddress,
                 uppertitle: "Email Address",
-                fieldname: "Email address",
                 textvalidator: "Provide valid email address"),
             const SizedBox(
               height: 15,
@@ -175,7 +283,6 @@ class _VetControllerState extends State<VetController> {
                         ),
                         textEditingController: password,
                         uppertitle: "Password",
-                        fieldname: "Password",
                         textvalidator: "Password")),
                 const SizedBox(
                   width: 5,
@@ -189,36 +296,32 @@ class _VetControllerState extends State<VetController> {
                               isconfirm = !isconfirm;
                             });
                           },
-                          child: Icon(isobscure
+                          child: Icon(isconfirm
                               ? Icons.visibility_outlined
                               : Icons.visibility_off_outlined),
                         ),
                         textEditingController: cpassword,
                         uppertitle: "Confirm Password",
-                        fieldname: "Confirm password",
                         textvalidator: "Confirm password")),
               ],
             ),
             const SizedBox(
               height: 15,
             ),
-            GlobalButton(
-                callback: () {
-                  uploadfirstcred();
-                },
-                title: "Proceed")
+            isuploading == false
+                ? GlobalButton(
+                    callback: () {
+                      isuploading == false ? uploadfirstcred() : null;
+                    },
+                    title: "Proceed")
+                : Center(
+                    child: CircularProgressIndicator(
+                      color: maincolor,
+                    ),
+                  )
           ],
         ),
       ),
     );
-  }
-
-  Future<void> uploadfirstcred() async {
-    try {
-      if (_formkey.currentState!.validate()) {
-        Navigator.push(context,
-            MaterialPageRoute(builder: (context) => const VetGovController()));
-      }
-    } catch (error) {}
   }
 }

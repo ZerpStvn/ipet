@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:ipet/controller/signup.dart';
 import 'package:ipet/misc/themestyle.dart';
 
 class SelectTypeUser extends StatefulWidget {
@@ -31,6 +30,7 @@ class _SelectTypeUserState extends State<SelectTypeUser> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
         surfaceTintColor: Colors.white,
       ),
       body: Column(
@@ -74,29 +74,32 @@ class _SelectTypeUserState extends State<SelectTypeUser> {
           ),
           Row(
             children: selecttypeuser.map((items) {
-              return Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) =>
-                                SignupController(isvet: items['isvet'])));
-                  },
-                  child: Column(
-                    children: [
-                      Container(
-                        height: 150,
-                        width: 180,
-                        decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(width: 1, color: Colors.black),
-                            image: DecorationImage(
-                                image: AssetImage("${items['assets']}"))),
-                      ),
-                      Text("${items['types']}")
-                    ],
+              return Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.pushNamed(context, items['route']);
+                      // Navigator.push(
+                      //     context,
+                      //     MaterialPageRoute(
+                      //         builder: (context) =>
+                      //             SignupController(isvet: items['isvet'])));
+                    },
+                    child: Column(
+                      children: [
+                        Container(
+                          height: 150,
+                          width: 180,
+                          decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(width: 1, color: Colors.black),
+                              image: DecorationImage(
+                                  image: AssetImage("${items['assets']}"))),
+                        ),
+                        Text("${items['types']}")
+                      ],
+                    ),
                   ),
                 ),
               );
