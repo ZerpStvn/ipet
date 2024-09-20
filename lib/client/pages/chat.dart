@@ -26,22 +26,39 @@ class _ChatVetState extends State<ChatVet> {
     if (_messageController.text.isEmpty && _selectedImage == null) return;
 
     String? imageUrl;
+
     if (_selectedImage != null) {
       imageUrl = await _uploadImage();
     }
 
-    await _firestore.collection('chats').add({
-      'text': _messageController.text,
-      'senderId': _auth.currentUser!.uid,
-      'vetId': widget.vetID,
-      'imageUrl': imageUrl,
-      'timestamp': FieldValue.serverTimestamp(),
-    });
+    try {
+      DocumentReference chatDoc =
+          _firestore.collection('chats').doc(widget.vetID);
 
-    _messageController.clear();
-    setState(() {
-      _selectedImage = null;
-    });
+      // Create or update the chat document
+      await chatDoc.set({
+        'vetID': widget.vetID,
+        'userid': _auth.currentUser!.uid,
+      }, SetOptions(merge: true));
+
+      CollectionReference messageCollection = chatDoc.collection('message');
+
+      await messageCollection.add({
+        'text': _messageController.text,
+        'senderId': _auth.currentUser!.uid,
+        'vetId': widget.vetID,
+        'imageUrl': imageUrl,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+
+      _messageController.clear();
+      setState(() {
+        _selectedImage = null;
+      });
+    } catch (e) {
+      // Print or handle any errors that occur during message sending
+      print('Error sending message: $e');
+    }
   }
 
   Future<String?> _uploadImage() async {
@@ -102,7 +119,8 @@ class _ChatVetState extends State<ChatVet> {
     return StreamBuilder<QuerySnapshot>(
       stream: _firestore
           .collection('chats')
-          .where('vetId', isEqualTo: widget.vetID)
+          .doc(widget.vetID)
+          .collection('message')
           .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
@@ -113,10 +131,8 @@ class _ChatVetState extends State<ChatVet> {
           return Center(child: Text('No messages'));
         }
 
-        // Fetch the messages and sort them by timestamp here
         var messages = snapshot.data!.docs;
 
-        // Sort the messages based on the 'timestamp' field
         messages.sort((a, b) {
           Timestamp timeA = a['timestamp'] ?? Timestamp.now();
           Timestamp timeB = b['timestamp'] ?? Timestamp.now();
@@ -134,30 +150,29 @@ class _ChatVetState extends State<ChatVet> {
               alignment:
                   isSender ? Alignment.centerRight : Alignment.centerLeft,
               child: Container(
-                margin: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-                padding: EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: isSender ? maincolor : Colors.grey[300],
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (message['imageUrl'] != null)
-                      Image.network(
-                        message['imageUrl'],
-                        width: 50,
-                        height: 50,
-                        fit: BoxFit.cover,
+                  margin: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+                  padding: EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: isSender ? maincolor : Colors.grey[300],
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (message['imageUrl'] != null)
+                        Image.network(
+                          message['imageUrl'],
+                          width: 50,
+                          height: 50,
+                          fit: BoxFit.cover,
+                        ),
+                      Text(
+                        message['text'] ?? '',
+                        style: TextStyle(
+                            color: isSender ? Colors.white : Colors.black),
                       ),
-                    Text(
-                      message['text'] ?? '',
-                      style: TextStyle(
-                          color: isSender ? Colors.white : Colors.black),
-                    ),
-                  ],
-                ),
-              ),
+                    ],
+                  )),
             );
           },
         );
