@@ -31,8 +31,6 @@ class _HomeUserState extends State<HomeUser> {
 
   @override
   Widget build(BuildContext context) {
-    return onboardsave == false
-        ? const OnboardingPage()
-        : const GloballoginController();
+    return GloballoginController();
   }
 }

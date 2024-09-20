@@ -321,7 +321,7 @@ class _ClientMapWidgetState extends State<ClientMapWidget>
                                     ishome: true,
                                     isclient: true)));
                       },
-                      icon: Icon(
+                      icon: const Icon(
                         Icons.location_pin,
                         color: Colors.white,
                       )))),

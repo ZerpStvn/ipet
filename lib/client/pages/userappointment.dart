@@ -139,8 +139,8 @@ class _UserAppointmentcheckState extends State<UserAppointmentcheck> {
                           title: widget.isvetadmin == true
                               ? "Appoint.."
                               : "Appointment")),
-                  DataColumn(label: MainFont(title: "Status")),
-                  DataColumn(label: MainFont(title: "Action")),
+                  const DataColumn(label: MainFont(title: "Status")),
+                  const DataColumn(label: MainFont(title: "Action")),
                 ],
                 rows: events[DateTime(_selectedDay!.year, _selectedDay!.month,
                         _selectedDay!.day)]!

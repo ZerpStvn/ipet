@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:ipet/client/pages/chat.dart';
 import 'package:ipet/client/widgets/ratingsInformation.dart';
 import 'package:ipet/client/widgets/ratingsreview.dart';
 import 'package:ipet/client/widgets/singlevetData.dart';
@@ -87,6 +88,22 @@ class _ClinicViewSingleState extends State<ClinicViewSingle> {
   Widget build(BuildContext context) {
     final userauth = Provider.of<AuthProviderClass>(context);
     return Scaffold(
+      floatingActionButton: Container(
+        decoration: BoxDecoration(
+          color: maincolor,
+          shape: BoxShape.circle,
+        ),
+        child: IconButton(
+            onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) =>
+                        ChatVet(vetID: "${widget.documentID}"))),
+            icon: Icon(
+              Icons.message_outlined,
+              color: Colors.white,
+            )),
+      ),
       body: SingleChildScrollView(
         child: FutureBuilder(
             future: usercred
