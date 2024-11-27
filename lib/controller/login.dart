@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:ipet/client/pages/home.client.dart';
 import 'package:ipet/misc/snackbar.dart';
@@ -238,17 +239,60 @@ class _GloballoginControllerState extends State<GloballoginController> {
               ));
   }
 
-  Future<void> loginuser(BuildContext context, String email, password) async {
+  Future<void> loginuser(
+      BuildContext context, String email, String password) async {
     final authProvider = Provider.of<AuthProviderClass>(context, listen: false);
     prefs = await SharedPreferences.getInstance();
+    final currentuserlog = FirebaseAuth.instance;
     setState(() {
       isloggingin = true;
     });
     try {
       if (_formkey.currentState!.validate()) {
+        // Attempt login
         await authProvider
             .loginWithEmailAndPassword(email, password)
-            .then((value) {
+            .then((value) async {
+          // Check if email is verified
+          if (currentuserlog.currentUser != null &&
+              !currentuserlog.currentUser!.emailVerified) {
+            // Show modal to inform the user
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  title: Text('Email Not Verified'),
+                  content: Text(
+                      'Your email is not verified. Please check your inbox or spam folder to verify your email.'),
+                  actions: [
+                    TextButton(
+                      onPressed: () async {
+                        // Resend verification email
+                        await currentuserlog.currentUser!
+                            .sendEmailVerification();
+                        Navigator.of(context).pop();
+                        snackbar(context,
+                            'Verification email resent. Check your inbox.');
+                      },
+                      child: Text('Resend Email'),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: Text('Close'),
+                    ),
+                  ],
+                );
+              },
+            );
+            setState(() {
+              isloggingin = false;
+            });
+            return; // Exit login process
+          }
+
+          // Proceed with login if email is verified
           getuserdata(authProvider.userModel!.role);
           setState(() {
             isloggingin = false;
@@ -266,24 +310,31 @@ class _GloballoginControllerState extends State<GloballoginController> {
         switch (error.code) {
           case "invalid-email":
             debugPrint("Your email address is invalid.");
+            snackbar(context, "Invalid email address. Please try again.");
             break;
           case "wrong-password":
             debugPrint("Your password is wrong.");
+            snackbar(context, "Incorrect password. Please try again.");
             break;
           case "user-not-found":
             debugPrint("User with this email doesn't exist.");
+            snackbar(context, "No user found with this email.");
             break;
           case "user-disabled":
             debugPrint("User with this email has been disabled.");
+            snackbar(context, "This account has been disabled.");
             break;
           case "too-many-requests":
             debugPrint("Too many requests");
+            snackbar(context, "Too many login attempts. Try again later.");
             break;
           case "operation-not-allowed":
             debugPrint("Signing in with Email and Password is not enabled.");
+            snackbar(context,
+                "Login with email and password is not enabled for this account.");
             break;
           default:
-            snackbar(context, "Check your email, password and try again");
+            snackbar(context, "Check your email, password, and try again.");
         }
 
         isloggingin = false;

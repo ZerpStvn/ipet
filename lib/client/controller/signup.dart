@@ -113,10 +113,21 @@ class _ClientRegisterState extends State<ClientRegister> {
     try {
       if (_formkey.currentState!.validate()) {
         if (xFile != null) {
+          // Create user
           await userAuth
               .createUserWithEmailAndPassword(
                   email: emailaddress.text, password: password.text)
-              .then((value) => handlecreateuser(value.user!.uid));
+              .then((value) async {
+            // Handle user creation logic
+            await handlecreateuser(value.user!.uid);
+
+            // Send verification email
+            if (value.user != null && !value.user!.emailVerified) {
+              await value.user!.sendEmailVerification();
+              snackbar(
+                  context, "Verification email sent. Please check your inbox.");
+            }
+          });
         } else {
           setState(() {
             imageprofile = "Add your profile picture";
@@ -130,7 +141,7 @@ class _ClientRegisterState extends State<ClientRegister> {
       }
     } on FirebaseException catch (e) {
       if (mounted) {
-        snackbar(context, "Error Signin you up, Try again later");
+        snackbar(context, "Error signing you up, try again later.");
         debugPrint("$e");
       }
       setState(() {

@@ -36,7 +36,7 @@ class _VetClinicUserClientPolylineState
 
   static const CameraPosition _kGooglePlex = CameraPosition(
     target: LatLng(10.720641, 122.553519),
-    zoom: 13.9746,
+    zoom: 11.9746,
   );
 
   late Set<Marker> _markers;
@@ -99,6 +99,9 @@ class _VetClinicUserClientPolylineState
       if (response.statusCode == 200) {
         final jsonData = json.decode(response.body);
         List<dynamic> routes = jsonData['routes'];
+        debugPrint('Request URL: $url');
+        debugPrint('Response: ${response.body}');
+
         if (routes.isNotEmpty) {
           String pointsEncoded = routes[0]['overview_polyline']['points'];
           routePoints = _decodePolyline(pointsEncoded);

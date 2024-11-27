@@ -46,19 +46,19 @@ class SingleVetData extends StatelessWidget {
           const SizedBox(
             height: 15,
           ),
-          const Text("Operation Time",
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
-          const SizedBox(
-            height: 10,
-          ),
-          Column(
-            children: operations.map((e) {
-              return Text("${e['day']} ${e['startTime']} - ${e['endTime']} ");
-            }).toList(),
-          ),
-          const SizedBox(
-            height: 15,
-          ),
+          // const Text("Operation Time",
+          //     style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+          // const SizedBox(
+          //   height: 10,
+          // ),
+          // Column(
+          //   children: operations.map((e) {
+          //     return Text("${e['day']} ${e['startTime']} - ${e['endTime']} ");
+          //   }).toList(),
+          // ),
+          // const SizedBox(
+          //   height: 15,
+          // ),
           const Padding(
             padding: EdgeInsets.all(11.0),
             child: RecentAppointment(

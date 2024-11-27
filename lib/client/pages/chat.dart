@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:ipet/misc/themestyle.dart';
 
 class ChatVet extends StatefulWidget {
@@ -146,33 +147,49 @@ class _ChatVetState extends State<ChatVet> {
             var message = messages[index];
             bool isSender = message['senderId'] == _auth.currentUser!.uid;
 
+            // Extract timestamp
+            Timestamp timestamp = message['timestamp'] ?? Timestamp.now();
+            DateTime dateTime = timestamp.toDate();
+
+            // Format time
+            String formattedTime = DateFormat('h:mm a').format(dateTime);
+
             return Align(
               alignment:
                   isSender ? Alignment.centerRight : Alignment.centerLeft,
               child: Container(
-                  margin: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-                  padding: EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: isSender ? maincolor : Colors.grey[300],
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (message['imageUrl'] != null)
-                        Image.network(
-                          message['imageUrl'],
-                          width: 50,
-                          height: 50,
-                          fit: BoxFit.cover,
-                        ),
-                      Text(
-                        message['text'] ?? '',
-                        style: TextStyle(
-                            color: isSender ? Colors.white : Colors.black),
+                margin: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+                padding: EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: isSender ? maincolor : Colors.grey[300],
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (message['imageUrl'] != null)
+                      Image.network(
+                        message['imageUrl'],
+                        width: 50,
+                        height: 50,
+                        fit: BoxFit.cover,
                       ),
-                    ],
-                  )),
+                    Text(
+                      message['text'] ?? '',
+                      style: TextStyle(
+                          color: isSender ? Colors.white : Colors.black),
+                    ),
+                    SizedBox(height: 5),
+                    Text(
+                      formattedTime,
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: isSender ? Colors.white70 : Colors.black54,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             );
           },
         );

@@ -3,15 +3,18 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:custom_info_window/custom_info_window.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:ipet/client/controller/listofclinic.dart';
+import 'package:ipet/client/pages/clinicsingleview.dart';
 import 'package:ipet/client/pages/searchpage.dart';
 import 'package:ipet/controller/vetmap.dart';
 import 'package:ipet/misc/function.dart';
 import 'package:ipet/misc/themestyle.dart';
 import 'package:ipet/model/Authprovider.dart';
 import 'package:ipet/model/users.dart';
+import 'package:ipet/veterinary/widgets/topbar.dart';
 import 'package:provider/provider.dart';
 
 class ClientMapWidget extends StatefulWidget {
@@ -31,6 +34,7 @@ class _ClientMapWidgetState extends State<ClientMapWidget>
   //   target: LatLng(10.720641, 122.553519),
   //   zoom: 14.2746,
   // );
+  final _customwindowController = CustomInfoWindowController();
   final BitmapDescriptor customMarkerIcon =
       BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure);
   final TextEditingController searchplace = TextEditingController();
@@ -118,9 +122,73 @@ class _ClientMapWidgetState extends State<ClientMapWidget>
           double lat = location['lat'];
           double lon = location['long'];
           String name = location['clinicname'];
+          String imageprofile = location['imageprofile'];
+          String dateestablished = location['dateestablished'];
+          String description = location['description'];
           Marker vetMarker = Marker(
             markerId: MarkerId("location$lat"),
             position: LatLng(lat, lon),
+            onTap: () {
+              _customwindowController.addInfoWindow!(
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => ClinicViewSingle(
+                                  documentID: location['id'])));
+                    },
+                    child: Container(
+                      clipBehavior: Clip.antiAlias,
+                      decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20)),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            width: MediaQuery.of(context).size.width,
+                            height: 80,
+                            decoration: BoxDecoration(
+                                image: DecorationImage(
+                                    image: NetworkImage(imageprofile))),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 8.0),
+                            child: Text(
+                              overflow: TextOverflow.ellipsis,
+                              "$name",
+                              style: TextStyle(fontSize: 10),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 8.0),
+                            child: Text(
+                              "EST: $dateestablished",
+                              style: TextStyle(fontSize: 10),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 8.0),
+                            child: Text(
+                              "Lat: ${lat.toStringAsFixed(2)}, Long: ${lon.toStringAsFixed(2)}",
+                              style: TextStyle(fontSize: 10),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 8.0),
+                            child: Text(
+                              overflow: TextOverflow.ellipsis,
+                              "$description",
+                              style: TextStyle(fontSize: 10),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  LatLng(lat, lon));
+            },
             icon:
                 BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRose),
             infoWindow: InfoWindow(title: name),
@@ -143,13 +211,19 @@ class _ClientMapWidgetState extends State<ClientMapWidget>
       double lat = double.parse(doc['lat']);
       double lon = double.parse(doc['long']);
       String name = doc['clinicname'];
+      String imageprofile = doc['imageprofile'];
       int valid = doc['valid'];
+      String dateestablished = doc['dateestablished'];
+      String description = doc['description'];
       vetLocations.add({
         'id': doc.id,
         'lat': lat,
         'long': lon,
         'valid': valid,
         'clinicname': name,
+        'imageprofile': imageprofile,
+        'dateestablished': dateestablished,
+        'description': description,
       });
     }
     return vetLocations;
@@ -177,6 +251,12 @@ class _ClientMapWidgetState extends State<ClientMapWidget>
                   return Text('Error: ${snapshot.error}');
                 } else {
                   return GoogleMap(
+                    onTap: (location) {
+                      _customwindowController.hideInfoWindow!();
+                    },
+                    onCameraMove: (position) {
+                      _customwindowController.onCameraMove!();
+                    },
                     zoomControlsEnabled: false,
                     mapType: MapType.normal,
                     initialCameraPosition: CameraPosition(
@@ -186,6 +266,7 @@ class _ClientMapWidgetState extends State<ClientMapWidget>
                             double.parse(
                                 "${widget.provider.usermapping!.long}"))),
                     onMapCreated: (GoogleMapController controller) {
+                      _customwindowController.googleMapController = controller;
                       if (!_controller.isCompleted) {
                         _controller.complete(controller);
                       }
@@ -207,7 +288,12 @@ class _ClientMapWidgetState extends State<ClientMapWidget>
               },
             ),
           ),
-
+          CustomInfoWindow(
+            controller: _customwindowController,
+            height: 150,
+            width: 150,
+            offset: 50,
+          ),
           // SizedBox(
           //   width: MediaQuery.of(context).size.width * 99,
           //   height: 699,

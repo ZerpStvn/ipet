@@ -1,5 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -175,11 +177,16 @@ class _ClinicViewSingleState extends State<ClinicViewSingle> {
                       specialties: specialties,
                       widget: widget,
                       showmod: () {
-                        _selectDateTime(
-                            context,
+                        showoperationtimeavailable(
+                            operations,
                             userauth,
                             "${data['imageprofile'] ?? ""}",
                             "${data['clinicname'] ?? ""}");
+                        // _selectDateTime(
+                        //     context,
+                        //     userauth,
+                        //     "${data['imageprofile'] ?? ""}",
+                        //     "${data['clinicname'] ?? ""}");
                       },
                     )
                   ],
@@ -301,6 +308,90 @@ class _ClinicViewSingleState extends State<ClinicViewSingle> {
                 )),
           );
         });
+  }
+
+  void showoperationtimeavailable(
+    dynamic operations,
+    AuthProviderClass userauth,
+    String clinicprofile,
+    String name,
+  ) {
+    int countdown = 3; // Start with 3 seconds
+    bool isContinueEnabled = false;
+
+    // Define a Timer variable
+    Timer? countdownTimer;
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            // Start the countdown timer only once
+            if (countdownTimer == null) {
+              countdownTimer = Timer.periodic(Duration(seconds: 1), (timer) {
+                if (countdown > 1) {
+                  countdown--;
+                  if (mounted) {
+                    setState(() {}); // Update the UI
+                  }
+                } else {
+                  countdown = 0;
+                  isContinueEnabled = true;
+                  timer.cancel(); // Stop the timer
+                  if (mounted) {
+                    setState(() {}); // Final update to enable the button
+                  }
+                }
+              });
+            }
+
+            return AlertDialog(
+              title: Text("Operation Time"),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ...operations.map((e) {
+                    return Text(
+                        "${e['day']} ${e['startTime']} - ${e['endTime']} ");
+                  }).toList(),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    countdownTimer
+                        ?.cancel(); // Cancel the timer when dialog is closed
+                    Navigator.pop(context);
+                  },
+                  child: Text("Cancel"),
+                ),
+                TextButton(
+                  onPressed: isContinueEnabled
+                      ? () {
+                          countdownTimer
+                              ?.cancel(); // Cancel the timer when moving forward
+                          _selectDateTime(
+                            context,
+                            userauth,
+                            clinicprofile,
+                            name,
+                          );
+                        }
+                      : null,
+                  child: countdown > 0
+                      ? Text("Continue (${countdown})")
+                      : Text("Continue"),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    ).then((_) {
+      // Ensure the timer is canceled if the dialog is closed unexpectedly
+      countdownTimer?.cancel();
+    });
   }
 
   Future<void> _selectDateTime(
