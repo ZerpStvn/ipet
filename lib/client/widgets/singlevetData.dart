@@ -6,7 +6,7 @@ import 'package:ipet/client/widgets/ratingsview.dart';
 import 'package:ipet/client/widgets/recentappointment.dart';
 import 'package:ipet/misc/themestyle.dart';
 
-class SingleVetData extends StatelessWidget {
+class SingleVetData extends StatefulWidget {
   const SingleVetData({
     super.key,
     required this.operations,
@@ -25,6 +25,47 @@ class SingleVetData extends StatelessWidget {
   final ClinicViewSingle widget;
 
   @override
+  State<SingleVetData> createState() => _SingleVetDataState();
+}
+
+class _SingleVetDataState extends State<SingleVetData> {
+  String checkclinic(int isclose, int isdoctor) {
+    if (isclose == 1) {
+      return "Clinic Is Currently Closed";
+    }
+
+    if (isdoctor == 1) {
+      return "Doctor Not Available";
+    } else {
+      return "Schedule Appointment";
+    }
+  }
+
+  Color ischeckClinic(int isclose, int isdoctor) {
+    if (isclose == 1) {
+      return Colors.red;
+    }
+
+    if (isdoctor == 1) {
+      return Colors.red;
+    } else {
+      return maincolor;
+    }
+  }
+
+  Function? ischeckclinicfunc(int isclose, int isdoctor) {
+    if (isclose == 1) {
+      return null;
+    }
+
+    if (isdoctor == 1) {
+      return null;
+    } else {
+      return widget.showmod();
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -33,14 +74,17 @@ class SingleVetData extends StatelessWidget {
         children: [
           ElevatedButton(
               style: ElevatedButton.styleFrom(
-                  backgroundColor: maincolor,
+                  backgroundColor: ischeckClinic(
+                      widget.data!['isclose'], widget.data!['ishaveadoctor']),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10))),
               onPressed: () {
-                showmod();
+                ischeckclinicfunc(
+                    widget.data!['isclose'], widget.data!['ishaveadoctor']);
               },
-              child: const Text(
-                "Schedule Appointment",
+              child: Text(
+                checkclinic(
+                    widget.data!['isclose'], widget.data!['ishaveadoctor']),
                 style: TextStyle(color: Colors.white),
               )),
           const SizedBox(
@@ -70,7 +114,7 @@ class SingleVetData extends StatelessWidget {
           const SizedBox(
             height: 10,
           ),
-          Text("${data!["description"]}"),
+          Text("${widget.data!["description"]}"),
           const SizedBox(
             height: 25,
           ),
@@ -82,7 +126,7 @@ class SingleVetData extends StatelessWidget {
           Wrap(
             spacing: 8.0,
             runSpacing: 8.0,
-            children: services.map((e) {
+            children: widget.services.map((e) {
               return Chip(
                 side: BorderSide(width: 0, color: maincolor),
                 label: Text(e),
@@ -102,7 +146,7 @@ class SingleVetData extends StatelessWidget {
           Wrap(
             spacing: 8.0,
             runSpacing: 8.0,
-            children: specialties.map((e) {
+            children: widget.specialties.map((e) {
               return Chip(
                 side: BorderSide(width: 0, color: maincolor),
                 label: Text(e),
@@ -115,7 +159,7 @@ class SingleVetData extends StatelessWidget {
             height: 25,
           ),
           RatingsView(
-            widget: widget,
+            widget: widget.widget,
             isadmin: false,
           ),
           const SizedBox(
