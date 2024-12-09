@@ -3,6 +3,7 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -28,6 +29,8 @@ class ClinicViewSingle extends StatefulWidget {
 class _ClinicViewSingleState extends State<ClinicViewSingle> {
   final TextEditingController comments = TextEditingController();
   final TextEditingController purpose = TextEditingController();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   List<String> services = [];
   bool iscomminting = false;
   double ratereivew = 0;
@@ -85,6 +88,30 @@ class _ClinicViewSingleState extends State<ClinicViewSingle> {
 
   // "profile": "${userauth.userModel!.imageprofile}",
   // "name": "${userauth.userModel!.fname}",
+  Future<void> _sendMessage() async {
+    try {
+      DocumentReference chatDoc =
+          _firestore.collection('chats').doc(widget.documentID);
+
+      // Create or update the chat document
+      await chatDoc.set({
+        'vetID': widget.documentID,
+        'userid': _auth.currentUser!.uid,
+      }, SetOptions(merge: true));
+
+      CollectionReference messageCollection = chatDoc.collection('message');
+
+      await messageCollection.add({
+        'text': "New Scheduled Appointment",
+        'senderId': _auth.currentUser!.uid,
+        'vetId': widget.documentID,
+        'imageUrl': null,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      print('Error sending message: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -582,6 +609,8 @@ class _ClinicViewSingleState extends State<ClinicViewSingle> {
           'status': 0,
           'purpose': purpose.text,
           'service': selectedValue,
+        }).then((onvalue) {
+          _sendMessage();
         });
         setState(() {});
       }
