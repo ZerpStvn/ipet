@@ -24,6 +24,9 @@ class _ChatVetState extends State<ChatVet> {
   File? _selectedImage;
 
   Future<void> _sendMessage() async {
+    List<String> ids = [widget.vetID, _auth.currentUser!.uid];
+    ids.sort();
+    String chatDocId = ids.join("_");
     if (_messageController.text.isEmpty && _selectedImage == null) return;
 
     String? imageUrl;
@@ -33,8 +36,7 @@ class _ChatVetState extends State<ChatVet> {
     }
 
     try {
-      DocumentReference chatDoc =
-          _firestore.collection('chats').doc(widget.vetID);
+      DocumentReference chatDoc = _firestore.collection('chats').doc(chatDocId);
 
       // Create or update the chat document
       await chatDoc.set({
@@ -117,10 +119,13 @@ class _ChatVetState extends State<ChatVet> {
   }
 
   Widget _buildMessageList() {
+    List<String> ids = [widget.vetID, _auth.currentUser!.uid];
+    ids.sort();
+    String chatDocId = ids.join("_");
     return StreamBuilder<QuerySnapshot>(
       stream: _firestore
           .collection('chats')
-          .doc(widget.vetID)
+          .doc(chatDocId)
           .collection('message')
           .snapshots(),
       builder: (context, snapshot) {

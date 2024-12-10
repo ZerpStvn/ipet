@@ -90,8 +90,10 @@ class _ClinicViewSingleState extends State<ClinicViewSingle> {
   // "name": "${userauth.userModel!.fname}",
   Future<void> _sendMessage() async {
     try {
-      DocumentReference chatDoc =
-          _firestore.collection('chats').doc(widget.documentID);
+      List<String> ids = [widget.documentID, _auth.currentUser!.uid];
+      ids.sort();
+      String chatDocId = ids.join("_");
+      DocumentReference chatDoc = _firestore.collection('chats').doc(chatDocId);
 
       // Create or update the chat document
       await chatDoc.set({
@@ -428,36 +430,117 @@ class _ClinicViewSingleState extends State<ClinicViewSingle> {
     String name,
   ) async {
     try {
+      // Fetch existing appointments
+      final snapshot = await FirebaseFirestore.instance
+          .collection('appointment')
+          .doc(widget.documentID) // Assuming widget.documentID is defined
+          .collection('vet')
+          .get();
+      debugPrint("Appointment $snapshot");
+
+      // Parse the booked slots into a set of DateTimes
+      final bookedSlots = snapshot.docs
+          .map((doc) {
+            final timestamp = doc['appoinmentdate'] as Timestamp?;
+            return timestamp?.toDate();
+          })
+          .whereType<DateTime>()
+          .toList();
+
+      // Define a function to check if a date is selectable
+      bool isSelectableDate(DateTime date) {
+        // All dates are selectable, we don't disable dates
+        return true;
+      }
+
+      // Adjust the initialDate to the next available date
+      DateTime initialDate = _selectedDateTime ?? DateTime.now();
+
+      // Show the date picker
       final DateTime? pickedDate = await showDatePicker(
         context: context,
-        initialDate: _selectedDateTime ?? DateTime.now(),
+        initialDate: initialDate,
         firstDate: DateTime.now(),
         lastDate: DateTime(2101),
+        selectableDayPredicate: isSelectableDate,
       );
 
       if (pickedDate != null) {
-        final TimeOfDay? pickedTime = await showTimePicker(
-          context: context,
-          initialTime: TimeOfDay.now(),
-        );
+        // Filter out already booked times for the selected date
+        final bookedTimes = bookedSlots
+            .where((slot) =>
+                slot.year == pickedDate.year &&
+                slot.month == pickedDate.month &&
+                slot.day == pickedDate.day)
+            .map((slot) => TimeOfDay(hour: slot.hour, minute: slot.minute))
+            .toList();
 
-        if (pickedTime != null) {
-          setState(() {
-            isuploading = true;
-          });
+        // Generate available times (on the hour, every hour)
+        final availableTimes = List.generate(24, (hour) {
+          final time = TimeOfDay(hour: hour, minute: 0);
+          // Check if this time or the next hour is booked
+          final nextHour = TimeOfDay(hour: hour + 1, minute: 0);
+          return !bookedTimes.contains(time) && !bookedTimes.contains(nextHour)
+              ? time
+              : null;
+        }).whereType<TimeOfDay>().toList();
 
-          _selectedDateTime = DateTime(
-            pickedDate.year,
-            pickedDate.month,
-            pickedDate.day,
-            pickedTime.hour,
-            pickedTime.minute,
+        // Ensure at least one time is available
+        if (availableTimes.isNotEmpty) {
+          final TimeOfDay? pickedTime = await showTimePicker(
+            context: context,
+            initialTime: TimeOfDay.now(),
+            builder: (BuildContext context, Widget? child) {
+              return MediaQuery(
+                data: MediaQuery.of(context)
+                    .copyWith(alwaysUse24HourFormat: false),
+                child: child ?? SizedBox(),
+              );
+            },
           );
-          showModalService(auth, clinicprofile, name);
 
-          setState(() {
-            isuploading = false;
-          });
+          if (pickedTime != null) {
+            // Ensure the selected time starts on the hour
+            final DateTime selectedTime = DateTime(
+              pickedDate.year,
+              pickedDate.month,
+              pickedDate.day,
+              pickedTime.hour,
+              0, // Minute forced to 0
+            );
+
+            // Check if the selected time or the next hour is booked
+            if (!bookedSlots.any((slot) =>
+                slot.year == selectedTime.year &&
+                slot.month == selectedTime.month &&
+                slot.day == selectedTime.day &&
+                (slot.hour == selectedTime.hour ||
+                    slot.hour == selectedTime.hour + 1))) {
+              setState(() {
+                isuploading = true;
+                _selectedDateTime = selectedTime;
+              });
+
+              // Call your showModalService or other actions
+              showModalService(auth, clinicprofile, name);
+
+              setState(() {
+                isuploading = false;
+              });
+            } else {
+              // Notify user the selected time is not available
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text("The selected time is Already taken.")),
+              );
+              Navigator.pop(context);
+            }
+          }
+        } else {
+          // Notify user no times are available for the selected date
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                content: Text("No available times for the selected date.")),
+          );
         }
       }
     } catch (error) {
