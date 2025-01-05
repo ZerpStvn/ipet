@@ -115,6 +115,91 @@ class _ClinicViewSingleState extends State<ClinicViewSingle> {
     }
   }
 
+  DateTime? startDate;
+  DateTime? endDate;
+
+  Future<void> _selectDateRange(BuildContext context) async {
+    final DateTimeRange? picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime.now(),
+      lastDate: DateTime(2100),
+    );
+    if (picked != null &&
+        picked !=
+            DateTimeRange(
+                start: startDate ?? DateTime.now(),
+                end: endDate ?? DateTime.now())) {
+      setState(() {
+        startDate = picked.start;
+        endDate = picked.end;
+      });
+    }
+  }
+
+  Future<void> _uploadBookingToFirebase() async {
+    if (startDate == null || endDate == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Please select a date range first.")),
+      );
+      return;
+    }
+
+    try {
+      // Fetch all bookings from Firestore
+      final querySnapshot = await FirebaseFirestore.instance
+          .collection('bookings')
+          .doc(widget.documentID)
+          .collection("books")
+          .get();
+
+      // Check for overlapping date ranges locally
+      bool isConflict = querySnapshot.docs.any((doc) {
+        final data = doc.data();
+        final bookedStartDate = (data['startDate'] as Timestamp).toDate();
+        final bookedEndDate = (data['endDate'] as Timestamp).toDate();
+
+        // Check for date range overlap
+        return startDate!.isBefore(bookedEndDate) &&
+            endDate!.isAfter(bookedStartDate);
+      });
+
+      if (isConflict) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text(
+                  "Selected date range is already booked. Please choose another range.")),
+        );
+        return;
+      }
+
+      // If no conflict, add the new booking
+      await FirebaseFirestore.instance
+          .collection('bookings')
+          .doc(widget.documentID)
+          .collection("books")
+          .doc(_auth.currentUser!.uid)
+          .set({
+        'Name': _auth.currentUser!.uid,
+        'startDate': Timestamp.fromDate(startDate!),
+        'endDate': Timestamp.fromDate(endDate!),
+        'createdAt': Timestamp.now(),
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Booking successfully uploaded!")),
+      );
+
+      setState(() {
+        startDate = null;
+        endDate = null;
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Failed to upload booking: $e")),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final userauth = Provider.of<AuthProviderClass>(context);
@@ -199,24 +284,71 @@ class _ClinicViewSingleState extends State<ClinicViewSingle> {
                     const SizedBox(
                       height: 10,
                     ),
-                    SingleVetData(
-                      operations: operations,
-                      data: data,
-                      services: services,
-                      specialties: specialties,
-                      widget: widget,
-                      showmod: () {
-                        showoperationtimeavailable(
-                            operations,
-                            userauth,
-                            "${data['imageprofile'] ?? ""}",
-                            "${data['clinicname'] ?? ""}");
-                        // _selectDateTime(
-                        //     context,
-                        //     userauth,
-                        //     "${data['imageprofile'] ?? ""}",
-                        //     "${data['clinicname'] ?? ""}");
-                      },
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(left: 8.0),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              FutureBuilder(
+                                  future: FirebaseFirestore.instance
+                                      .collection('bookings')
+                                      .doc(widget.documentID)
+                                      .collection("books")
+                                      .doc(_auth.currentUser!.uid)
+                                      .get(),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.hasError ||
+                                        !snapshot.hasData) {
+                                      return Text(
+                                          startDate != null && endDate != null
+                                              ? "Selected range: ${DateFormat('yyyy-MM-dd').format(startDate!)} - ${DateFormat('yyyy-MM-dd').format(endDate!)}"
+                                              : "No date range selected",
+                                          style: TextStyle(fontSize: 16));
+                                    } else {
+                                      return Text(
+                                          "Booked, Please message the clinic if you want to cancel your booking");
+                                    }
+                                  }),
+                              SizedBox(height: 20),
+                              startDate == null && endDate == null
+                                  ? ElevatedButton(
+                                      onPressed: () =>
+                                          _selectDateRange(context),
+                                      child: Text("Select Date for Booking"),
+                                    )
+                                  : ElevatedButton(
+                                      onPressed: _uploadBookingToFirebase,
+                                      child: Text("Upload Booking"),
+                                    ),
+                            ],
+                          ),
+                        ),
+                        SingleVetData(
+                          operations: operations,
+                          data: data,
+                          services: services,
+                          specialties: specialties,
+                          widget: widget,
+                          showmod: () {
+                            showoperationtimeavailable(
+                                operations,
+                                userauth,
+                                "${data['imageprofile'] ?? ""}",
+                                "${data['clinicname'] ?? ""}");
+                            // _selectDateTime(
+                            //     context,
+                            //     userauth,
+                            //     "${data['imageprofile'] ?? ""}",
+                            //     "${data['clinicname'] ?? ""}");
+                          },
+                          vetDocID: widget.documentID,
+                        ),
+                      ],
                     )
                   ],
                 );

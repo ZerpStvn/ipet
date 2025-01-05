@@ -7,9 +7,11 @@ import 'package:provider/provider.dart';
 
 class RecentAppointment extends StatefulWidget {
   final bool istitle;
+  final String vetDocID;
   const RecentAppointment({
     super.key,
     required this.istitle,
+    required this.vetDocID,
   });
 
   @override
@@ -43,6 +45,7 @@ class _RecentAppointmentState extends State<RecentAppointment> {
           .collection('user')
           .doc(docs)
           .update({"status": 1});
+
       setState(() {});
     } catch (error) {
       debugPrint("$error");
@@ -76,6 +79,12 @@ class _RecentAppointmentState extends State<RecentAppointment> {
     } catch (error) {
       debugPrint("$error");
     }
+  }
+
+  @override
+  void initState() {
+    debugPrint("VetID - ${widget.vetDocID}");
+    super.initState();
   }
 
   @override

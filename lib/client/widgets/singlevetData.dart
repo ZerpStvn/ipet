@@ -15,6 +15,7 @@ class SingleVetData extends StatefulWidget {
     required this.specialties,
     required this.widget,
     required this.showmod,
+    required this.vetDocID,
   });
 
   final Function showmod;
@@ -23,19 +24,22 @@ class SingleVetData extends StatefulWidget {
   final List services;
   final List specialties;
   final ClinicViewSingle widget;
-
+  final String vetDocID;
   @override
   State<SingleVetData> createState() => _SingleVetDataState();
 }
 
 class _SingleVetDataState extends State<SingleVetData> {
-  String checkclinic(int isclose, int isdoctor) {
+  String checkclinic(int? isclose, int? isdoctor) {
     if (isclose == 1) {
       return "Clinic Is Currently Closed";
     }
 
     if (isdoctor == 1) {
       return "Doctor Not Available";
+    }
+    if (isclose == null || isdoctor == null) {
+      return "Unavailable";
     } else {
       return "Schedule Appointment";
     }
@@ -79,8 +83,8 @@ class _SingleVetDataState extends State<SingleVetData> {
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10))),
               onPressed: () {
-                ischeckclinicfunc(
-                    widget.data!['isclose'], widget.data!['ishaveadoctor']);
+                ischeckclinicfunc(widget.data!['isclose'] ?? "",
+                    widget.data!['ishaveadoctor'] ?? "");
               },
               child: Text(
                 checkclinic(
@@ -103,10 +107,11 @@ class _SingleVetDataState extends State<SingleVetData> {
           // const SizedBox(
           //   height: 15,
           // ),
-          const Padding(
+          Padding(
             padding: EdgeInsets.all(11.0),
             child: RecentAppointment(
               istitle: false,
+              vetDocID: widget.vetDocID,
             ),
           ),
           const Text("About the Clinic",
