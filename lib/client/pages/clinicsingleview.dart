@@ -7,7 +7,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:ipet/client/pages/bookuser.dart';
 import 'package:ipet/client/pages/chat.dart';
+import 'package:ipet/client/widgets/bookingdt.dart';
 import 'package:ipet/client/widgets/ratingsInformation.dart';
 import 'package:ipet/client/widgets/ratingsreview.dart';
 import 'package:ipet/client/widgets/singlevetData.dart';
@@ -20,7 +22,10 @@ import 'package:provider/provider.dart';
 
 class ClinicViewSingle extends StatefulWidget {
   final String documentID;
-  const ClinicViewSingle({super.key, required this.documentID});
+  const ClinicViewSingle({
+    super.key,
+    required this.documentID,
+  });
 
   @override
   State<ClinicViewSingle> createState() => _ClinicViewSingleState();
@@ -40,10 +45,54 @@ class _ClinicViewSingleState extends State<ClinicViewSingle> {
   String? selectedValue;
   String? selectedaccomodation;
   bool isuploading = false;
+
+  Map<String, dynamic>? userData;
+  Map<String, dynamic>? checktypeclinic;
+
+  Future<void> fetchUserDataClinictype() async {
+    try {
+      final fetchdata = await FirebaseFirestore.instance
+          .collection('pet_services')
+          .doc(widget.documentID)
+          .get();
+
+      if (fetchdata.exists) {
+        setState(() {
+          checktypeclinic = fetchdata.data();
+        });
+      } else {
+        print('Document does not exist.');
+      }
+    } catch (e) {
+      print('Error fetching user data: $e');
+    }
+  }
+
+  Future<void> fetchUserDataClinic() async {
+    try {
+      final fetchdata = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(widget.documentID)
+          .get();
+
+      if (fetchdata.exists) {
+        setState(() {
+          userData = fetchdata.data();
+        });
+      } else {
+        print('Document does not exist.');
+      }
+    } catch (e) {
+      print('Error fetching user data: $e');
+    }
+  }
+
   @override
   void initState() {
     super.initState();
+    fetchUserDataClinic();
     getlistofservices();
+    fetchUserDataClinictype();
   }
 
   @override
@@ -118,86 +167,17 @@ class _ClinicViewSingleState extends State<ClinicViewSingle> {
   DateTime? startDate;
   DateTime? endDate;
 
-  Future<void> _selectDateRange(BuildContext context) async {
-    final DateTimeRange? picked = await showDateRangePicker(
-      context: context,
-      firstDate: DateTime.now(),
-      lastDate: DateTime(2100),
-    );
-    if (picked != null &&
-        picked !=
-            DateTimeRange(
-                start: startDate ?? DateTime.now(),
-                end: endDate ?? DateTime.now())) {
-      setState(() {
-        startDate = picked.start;
-        endDate = picked.end;
-      });
-    }
-  }
+  Future<bool> _checkUserBookingExists(String hotelclinicid) async {
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser == null) return false; // Not logged in
 
-  Future<void> _uploadBookingToFirebase() async {
-    if (startDate == null || endDate == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Please select a date range first.")),
-      );
-      return;
-    }
+    final snapshot = await FirebaseFirestore.instance
+        .collection('bookings')
+        .where('hotelclinicid', isEqualTo: hotelclinicid)
+        .where('userID', isEqualTo: currentUser.uid)
+        .get();
 
-    try {
-      // Fetch all bookings from Firestore
-      final querySnapshot = await FirebaseFirestore.instance
-          .collection('bookings')
-          .doc(widget.documentID)
-          .collection("books")
-          .get();
-
-      // Check for overlapping date ranges locally
-      bool isConflict = querySnapshot.docs.any((doc) {
-        final data = doc.data();
-        final bookedStartDate = (data['startDate'] as Timestamp).toDate();
-        final bookedEndDate = (data['endDate'] as Timestamp).toDate();
-
-        // Check for date range overlap
-        return startDate!.isBefore(bookedEndDate) &&
-            endDate!.isAfter(bookedStartDate);
-      });
-
-      if (isConflict) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text(
-                  "Selected date range is already booked. Please choose another range.")),
-        );
-        return;
-      }
-
-      // If no conflict, add the new booking
-      await FirebaseFirestore.instance
-          .collection('bookings')
-          .doc(widget.documentID)
-          .collection("books")
-          .doc(_auth.currentUser!.uid)
-          .set({
-        'Name': _auth.currentUser!.uid,
-        'startDate': Timestamp.fromDate(startDate!),
-        'endDate': Timestamp.fromDate(endDate!),
-        'createdAt': Timestamp.now(),
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Booking successfully uploaded!")),
-      );
-
-      setState(() {
-        startDate = null;
-        endDate = null;
-      });
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Failed to upload booking: $e")),
-      );
-    }
+    return snapshot.docs.isNotEmpty;
   }
 
   @override
@@ -213,8 +193,10 @@ class _ClinicViewSingleState extends State<ClinicViewSingle> {
             onPressed: () => Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) =>
-                        ChatVet(vetID: "${widget.documentID}"))),
+                    builder: (context) => ChatVet(
+                          vetID: "${widget.documentID}",
+                          email: userData!['email'],
+                        ))),
             icon: Icon(
               Icons.message_outlined,
               color: Colors.white,
@@ -294,37 +276,82 @@ class _ClinicViewSingleState extends State<ClinicViewSingle> {
                             mainAxisAlignment: MainAxisAlignment.start,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
+                              SizedBox(height: 20),
                               FutureBuilder(
                                   future: FirebaseFirestore.instance
-                                      .collection('bookings')
+                                      .collection('pet_services')
                                       .doc(widget.documentID)
-                                      .collection("books")
-                                      .doc(_auth.currentUser!.uid)
                                       .get(),
                                   builder: (context, snapshot) {
-                                    if (snapshot.hasError ||
-                                        !snapshot.hasData) {
-                                      return Text(
-                                          startDate != null && endDate != null
-                                              ? "Selected range: ${DateFormat('yyyy-MM-dd').format(startDate!)} - ${DateFormat('yyyy-MM-dd').format(endDate!)}"
-                                              : "No date range selected",
-                                          style: TextStyle(fontSize: 16));
+                                    if (!snapshot.hasData ||
+                                        snapshot.hasError) {
+                                      return Container();
                                     } else {
-                                      return Text(
-                                          "Booked, Please message the clinic if you want to cancel your booking");
+                                      var checktype =
+                                          snapshot.data!.data()!['type'] ??
+                                              "Clinic";
+                                      if (checktype == "Hotel") {
+                                        return ElevatedButton(
+                                          style: ElevatedButton.styleFrom(
+                                              backgroundColor: maincolor),
+                                          onPressed: () async {
+                                            final userHasBooking =
+                                                await _checkUserBookingExists(
+                                              widget.documentID,
+                                            );
+                                            if (userHasBooking) {
+                                              // Navigate to BookingDetails page
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      BookingDetails(
+                                                    hotelclinicid:
+                                                        widget.documentID,
+                                                    hotelclinicidemail:
+                                                        userData!['email'],
+                                                  ),
+                                                ),
+                                              );
+                                            } else {
+                                              // Navigate to the booking flow
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      Bookinguser(
+                                                    hotelclinicid:
+                                                        widget.documentID,
+                                                    hotelclinicemail:
+                                                        userData!['email'],
+                                                  ),
+                                                ),
+                                              );
+                                            }
+                                          },
+                                          child: FutureBuilder<bool>(
+                                            future: _checkUserBookingExists(
+                                                widget.documentID),
+                                            builder: (context, snapshot) {
+                                              if (snapshot.connectionState ==
+                                                  ConnectionState.waiting) {
+                                                return const CircularProgressIndicator(
+                                                    color: Colors.white);
+                                              }
+                                              if (snapshot.hasData &&
+                                                  snapshot.data == true) {
+                                                return const Text(
+                                                    "View Booking Details");
+                                              }
+                                              return const Text("Book Now");
+                                            },
+                                          ),
+                                        );
+                                      } else {
+                                        return Container();
+                                      }
                                     }
-                                  }),
-                              SizedBox(height: 20),
-                              startDate == null && endDate == null
-                                  ? ElevatedButton(
-                                      onPressed: () =>
-                                          _selectDateRange(context),
-                                      child: Text("Select Date for Booking"),
-                                    )
-                                  : ElevatedButton(
-                                      onPressed: _uploadBookingToFirebase,
-                                      child: Text("Upload Booking"),
-                                    ),
+                                  })
                             ],
                           ),
                         ),

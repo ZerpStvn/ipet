@@ -84,8 +84,9 @@ class _NearClinicViewState extends State<NearClinicView> {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) =>
-                                ClinicViewSingle(documentID: vetID)));
+                            builder: (context) => ClinicViewSingle(
+                                  documentID: vetID,
+                                )));
                   },
                   leading: Container(
                     height: 60,

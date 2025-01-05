@@ -129,7 +129,8 @@ class _SearchpageState extends State<Searchpage> {
                                         MaterialPageRoute(
                                             builder: (context) =>
                                                 ClinicViewSingle(
-                                                    documentID: clinicId)));
+                                                  documentID: clinicId,
+                                                )));
                                   },
                                   child: SizedBox(
                                       width: 310,

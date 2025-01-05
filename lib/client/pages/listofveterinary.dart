@@ -81,8 +81,9 @@ class _ListofVeterinaryState extends State<ListofVeterinary> {
                           Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) =>
-                                      ClinicViewSingle(documentID: vetID)));
+                                  builder: (context) => ClinicViewSingle(
+                                        documentID: vetID,
+                                      )));
                         },
                         child: SizedBox(
                             width: 310,

@@ -5,11 +5,13 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:ipet/client/pages/service/emailservice.dart';
 import 'package:ipet/misc/themestyle.dart';
 
 class ChatVet extends StatefulWidget {
   final String vetID;
-  const ChatVet({super.key, required this.vetID});
+  final String email;
+  const ChatVet({super.key, required this.vetID, required this.email});
 
   @override
   State<ChatVet> createState() => _ChatVetState();
@@ -22,7 +24,7 @@ class _ChatVetState extends State<ChatVet> {
   final ImagePicker _picker = ImagePicker();
 
   File? _selectedImage;
-
+  final _emailservice = EmailService();
   Future<void> _sendMessage() async {
     List<String> ids = [widget.vetID, _auth.currentUser!.uid];
     ids.sort();
@@ -53,7 +55,11 @@ class _ChatVetState extends State<ChatVet> {
         'imageUrl': imageUrl,
         'timestamp': FieldValue.serverTimestamp(),
       });
-
+      await _emailservice.sendMailVerified(
+          recipientEmail: widget.email,
+          message: "message from: ${_auth.currentUser!.email}",
+          subject:
+              "Pet GO - User sends you a message ${_auth.currentUser!.email}");
       _messageController.clear();
       setState(() {
         _selectedImage = null;

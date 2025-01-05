@@ -70,8 +70,9 @@ class _DisplayListofClinicState extends State<DisplayListofClinic> {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) =>
-                                ClinicViewSingle(documentID: vetID)));
+                            builder: (context) => ClinicViewSingle(
+                                  documentID: vetID,
+                                )));
                   },
                   child: SizedBox(
                       width: 310,
