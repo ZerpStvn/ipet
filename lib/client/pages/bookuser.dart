@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:ipet/client/controller/notifchek.dart';
 import 'package:ipet/client/pages/service/emailservice.dart';
 
 class Bookinguser extends StatefulWidget {
@@ -307,6 +308,8 @@ class _BookinguserState extends State<Bookinguser> {
     _saveBooking(userID);
   }
 
+  final curruser = FirebaseAuth.instance.currentUser;
+
   /// Actually saves the booking to Firestore
   Future<void> _saveBooking(String userID) async {
     setState(() => _isLoading = true);
@@ -331,7 +334,7 @@ class _BookinguserState extends State<Bookinguser> {
       }
 
       await _firestore.collection('bookings').add(bookingData);
-
+      await sendnotification(curruser!.uid, "Booking created ", "Booking");
       setState(() => _isLoading = false);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Booking created successfully!")),
@@ -543,13 +546,13 @@ class _BookinguserState extends State<Bookinguser> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              "Your Dogs",
+              "Your Pets",
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
             if (_dogs.isEmpty)
               const Text(
-                "No dogs added yet. Click 'Add Dog' to include them.",
+                "No Pets added yet. Click 'Add Dog' to include them.",
                 style: TextStyle(color: Colors.grey),
               ),
             ..._dogs.map((dog) {
@@ -581,7 +584,7 @@ class _BookinguserState extends State<Bookinguser> {
                 ),
                 onPressed: _addDogDialog,
                 icon: const Icon(Icons.add),
-                label: const Text("Add Dog"),
+                label: const Text("Add Pets"),
               ),
             ),
           ],

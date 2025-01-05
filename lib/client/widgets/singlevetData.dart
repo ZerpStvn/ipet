@@ -1,7 +1,11 @@
 // ignore_for_file: file_names
 
+import 'dart:ffi';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:ipet/client/pages/clinicsingleview.dart';
+import 'package:ipet/client/pages/service/pricetable.dart';
 import 'package:ipet/client/widgets/ratingsview.dart';
 import 'package:ipet/client/widgets/recentappointment.dart';
 import 'package:ipet/misc/themestyle.dart';
@@ -16,6 +20,7 @@ class SingleVetData extends StatefulWidget {
     required this.widget,
     required this.showmod,
     required this.vetDocID,
+    required this.canBookToday,
   });
 
   final Function showmod;
@@ -25,23 +30,28 @@ class SingleVetData extends StatefulWidget {
   final List specialties;
   final ClinicViewSingle widget;
   final String vetDocID;
+  final bool canBookToday;
   @override
   State<SingleVetData> createState() => _SingleVetDataState();
 }
 
 class _SingleVetDataState extends State<SingleVetData> {
   String checkclinic(int? isclose, int? isdoctor) {
-    if (isclose == 1) {
-      return "Clinic Is Currently Closed";
-    }
+    if (widget.canBookToday == true) {
+      if (isclose == 1) {
+        return "Clinic Is Currently Closed";
+      }
 
-    if (isdoctor == 1) {
-      return "Doctor Not Available";
-    }
-    if (isclose == null || isdoctor == null) {
-      return "Unavailable";
+      if (isdoctor == 1) {
+        return "Doctor Not Available";
+      }
+      if (isclose == null || isdoctor == null) {
+        return "Unavailable";
+      } else {
+        return "Schedule Appointment";
+      }
     } else {
-      return "Schedule Appointment";
+      return "Fully book for today";
     }
   }
 
@@ -49,7 +59,9 @@ class _SingleVetDataState extends State<SingleVetData> {
     if (isclose == 1) {
       return Colors.red;
     }
-
+    if (widget.canBookToday == false) {
+      return Colors.red;
+    }
     if (isdoctor == 1) {
       return Colors.red;
     } else {
@@ -76,21 +88,46 @@ class _SingleVetDataState extends State<SingleVetData> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                  backgroundColor: ischeckClinic(
-                      widget.data!['isclose'], widget.data!['ishaveadoctor']),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10))),
-              onPressed: () {
-                ischeckclinicfunc(widget.data!['isclose'] ?? "",
-                    widget.data!['ishaveadoctor'] ?? "");
-              },
-              child: Text(
-                checkclinic(
-                    widget.data!['isclose'], widget.data!['ishaveadoctor']),
-                style: TextStyle(color: Colors.white),
-              )),
+          FutureBuilder(
+              future: FirebaseFirestore.instance
+                  .collection('pet_services')
+                  .doc(widget.vetDocID)
+                  .get(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData || snapshot.hasError) {
+                  return Container();
+                }
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Container();
+                } else {
+                  var checktype = snapshot.data!.data()!['type'] ?? "Clinic";
+                  if (checktype == "Clinic") {
+                    return ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: ischeckClinic(
+                                widget.data!['isclose'],
+                                widget.data!['ishaveadoctor']),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10))),
+                        onPressed: () {
+                          if (widget.canBookToday == true) {
+                            ischeckclinicfunc(widget.data!['isclose'] ?? "",
+                                widget.data!['ishaveadoctor'] ?? "");
+                          } else {
+                            null;
+                          }
+                        },
+                        child: Text(
+                          checkclinic(widget.data!['isclose'],
+                              widget.data!['ishaveadoctor']),
+                          style: TextStyle(color: Colors.white),
+                        ));
+                  } else {
+                    return Container();
+                  }
+                }
+              }),
+
           const SizedBox(
             height: 15,
           ),
@@ -107,6 +144,7 @@ class _SingleVetDataState extends State<SingleVetData> {
           // const SizedBox(
           //   height: 15,
           // ),
+
           Padding(
             padding: EdgeInsets.all(11.0),
             child: RecentAppointment(
@@ -160,6 +198,7 @@ class _SingleVetDataState extends State<SingleVetData> {
               );
             }).toList(),
           ),
+          ServicesAndPricesPage(documentID: widget.vetDocID),
           const SizedBox(
             height: 25,
           ),

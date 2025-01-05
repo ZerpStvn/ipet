@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:ipet/client/controller/signup.dart';
 import 'package:ipet/client/pages/home.user.dart';
+import 'package:ipet/client/pages/service/notif.dart';
 import 'package:ipet/controller/signup.dart';
 import 'package:ipet/firebase_options.dart';
 import 'package:ipet/model/Authprovider.dart';
@@ -12,6 +13,7 @@ import 'package:provider/provider.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  NotificationService().initNotification();
   runApp(const MyApp());
 }
 
@@ -42,7 +44,7 @@ class MyApp extends StatelessWidget {
           '/vetuser': (context) => const HomeScreenVeterinary()
         },
         initialRoute: '/',
-        home:  const HomeUser(),
+        home: const HomeUser(),
       ),
     );
   }
